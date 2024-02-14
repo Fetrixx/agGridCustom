@@ -1,41 +1,130 @@
 <p>tab-comp works!</p>
 
+<button mat-icon-button [matMenuTriggerFor]="options" >
+  <mat-icon>more_vert</mat-icon>
+</button>
+
+
+
+<mat-menu #options="matMenu">
+  <button mat-menu-item>
+    <mat-icon>dialpad</mat-icon>
+    <span>Redial</span>
+  </button>
+
+  <button mat-menu-item>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <mat-form-field fxFlex (click)="stopPropagation($event)">
+        <mat-label>Buscar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="" #inputSearch>
+      </mat-form-field>
+    </div>
+  </button>
+
+  <button mat-menu-item>
+    <span>Disable alerts</span>
+  </button>
+
+</mat-menu>
+
+            
+<div fxLayout="column" fxLayoutGap="10px">
+  <mat-form-field fxFlex>
+    <mat-label>Buscar</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="" #inputSearch>
+  </mat-form-field>
+</div>
 
 <div fxLayout="column">
-    <div>
-        <mat-card style="margin: 4%">
-            <mat-card-content>
-                <div fxLayout="row" fxLayoutGap="10px">
-                    <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportToExcel()">
-                        <mat-icon fontIcon="file_download"></mat-icon> Exportar Seleccion a Excel
-                    </button>
-                    <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportAllToExcel()">
-                        <mat-icon fontIcon="file_download"></mat-icon> Exportar Todo a Excel
-                    </button>
-                    <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="sizeToFit()">
-                        <mat-icon fontIcon="swap_horiz"></mat-icon> Ajustar Columnas
-                    </button>
-                    <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="loadTableData()">
-                        <mat-icon fontIcon="refresh"></mat-icon> Refrescar
-                    </button>
-                    <button style="margin-right: 1%;" mat-raised-button color="warn"
-                        (click)="getSelectedRowData()">test_Log</button>
-                </div>
+  <div>
+    <mat-card style="margin: 4%">
+      <mat-card-content>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportToExcel()">
+            <mat-icon fontIcon="file_download"></mat-icon> Exportar Seleccion a Excel
+          </button>
+          <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportAllToExcel()">
+            <mat-icon fontIcon="file_download"></mat-icon> Exportar Todo a Excel
+          </button>
+          <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="sizeToFit()">
+            <mat-icon fontIcon="swap_horiz"></mat-icon> Ajustar Columnas
+          </button>
+          <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="loadTableDataSelector();">
+            <mat-icon fontIcon="refresh"></mat-icon> Refrescar
+          </button>
+          <button style="margin-right: 1%;" mat-raised-button color="primary">
+            <mat-icon fontIcon="refresh"></mat-icon> TEST
+          </button>
+          <button style="margin-right: 1%;" mat-raised-button color="warn"
+            (click)="getSelectedRowData()">test_Log</button>
+            <div > &nbsp; Items Seleccionados: {{selectedRowCount}}</div>
+        </div>
+        <div fxLayout="column" style="margin-top: 1%; margin-bottom: 1%; overflow-x: auto;">
+
+          <table mat-table [dataSource]="dataSource" matSort style="user-select: none;" cdkDropListGroup>
+            <ng-container *ngFor="let col of displayedColumns let i = index" [matColumnDef]="col">
+
+              <mat-header-cell *matHeaderCellDef mat-sort-header
+              cdkDropList
+              cdkDropListLockAxis="x"
+              cdkDropListOrientation="horizontal"
+              
+              cdkDrag
+              
+              [cdkDragData]="{name: col, columIndex: i}">
+              {{ col }}
+              >
+                <span> {{col}} </span> 
+                
+
+                  <button mat-icon-button [matMenuTriggerFor]="options" style="margin-left: 4px;"> 
+                    <mat-icon>more_vert</mat-icon>
+                  </button> 
+                
+                
+                 
+              </mat-header-cell>
+              <mat-cell *matCellDef="let element"> {{element[col]}} </mat-cell>
+
+            </ng-container>
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            
+
+            <!--
+              (click)="selectRow(row)" [ngClass]="{'selected-row': selectedRowIndex === row.index}"
+            -->
+            <mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
+              [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"
+              ></mat-row>
+              
+            <!-- Row shown when there is no matching data. -->
+            <tr *matNoDataRow>
+              <td colspan="10" style="text-align: center;"> <!--No hay datos que coincidan el valor "{{}}" -->
+              </td>
+            </tr>
+          </table>
+          <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons></mat-paginator>
 
 
-                <div fxLayout="column" style="margin-top: 1%; margin-bottom: 1%;">
-                    <table mat-table style="user-select: none;" [dataSource]="dataSource">
-                        <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
-                            <mat-header-cell *matHeaderCellDef > {{col}} </mat-header-cell>
-                            <mat-cell *matCellDef="let element" > {{element[col]}} </mat-cell>
-                        </ng-container>
-                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-                    </table>
-                    <div style="margin: 3%;">Items Seleccionados: {{selectedRowCount}}</div>
-                </div>
+          <!--table mat-table style="user-select: none;" [dataSource]="dataSource" matSort>
+            <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+              
+              <mat-header-cell *matHeaderCellDef mat-sort-header> {{col}} </mat-header-cell>
+              <mat-cell *matCellDef="let element"> {{element[col]}} </mat-cell>
 
-                <!-- 
+            </ng-container>
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            Row shown when there is no matching data. 
+            <tr *matNoDataRow>
+              <td colspan="10" style="text-align: center;"> No hay datos que coincidan el valor "{{}}" 
+              </td>
+            </tr>
+          </table-->
+          <!--div style="margin: 3%;">Items Seleccionados: {{selectedRowCount}}</div-->
+        </div>
+
+        <!-- 
                     <div fxLayout="column" style="margin-top: 1%; margin-bottom: 1%;">
                     <table mat-table style="user-select: none;" [dataSource]="dataSource" matSort>
                         <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
@@ -51,9 +140,9 @@
 
 
 
-            </mat-card-content>
-        </mat-card>
-    </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
 
 
@@ -92,8 +181,7 @@
                 <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
                 <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
               </mat-table>
-              <div>Items Seleccionados: {{selectedRowCount}}</div>
-            </div>
+              
           </mat-card-content>
         </mat-card>
       </div>

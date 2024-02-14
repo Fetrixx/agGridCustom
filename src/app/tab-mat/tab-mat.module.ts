@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabCompComponent } from './tab-comp/tab-comp.component';
 
-import { TableModule } from 'primeng/table';
 import { HttpClientModule } from '@angular/common/http';
 
 
@@ -28,25 +27,24 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {CdkTableModule} from '@angular/cdk/table';
+import {CdkTreeModule} from '@angular/cdk/tree';
+import {A11yModule} from '@angular/cdk/a11y';
+
+
 @NgModule({
   declarations: [
     TabCompComponent
   ],
   imports: [
     CommonModule,
-    TableModule,
     HttpClientModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatCardModule,
-    FlexLayoutModule,
-    MatInputModule,
-    MatCheckboxModule,
     MatIconModule,
     MatSelectModule,
     MatTableModule, 
     MatCheckboxModule,
-    MatTableModule,
     MatMenuModule,
     MatButtonModule,
     FormsModule,
@@ -59,7 +57,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatPaginatorModule,
     MatSortModule,
     MatInputModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    
+    DragDropModule,
+    ScrollingModule,
+    CdkTableModule,
+    CdkTreeModule,
+    A11yModule
 
   ],
   exports:[

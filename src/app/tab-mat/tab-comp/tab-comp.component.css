@@ -1,0 +1,10 @@
+/* Agrega este estilo en tu archivo CSS */
+.hover-effect:not(.selected-row):hover {
+    background-color: rgba(211, 211, 211, 0.1);
+    /* Cambia el color de fondo cuando se pasa el mouse sobre una fila */
+}
+
+.selected-row {
+    background-color: lightblue;
+    /* Cambia el color de fondo cuando se selecciona una fila */
+}
