@@ -18,14 +18,16 @@ import { SelectionChangedEvent } from 'ag-grid-community';
 
 export class TabCompComponent {
 
+  displayedColumns: string[] = [];
+  dataSource: any[] = [];
+  selectedRowCount: number = 0;
+
   
   private gridApi!: GridApi;
   gridOptions: GridOptions = {
-    
-
+  
   }
 
-  selectedRowCount: number = 0;
 
 
   // sets 10 rows per page (default is 100)

@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { TabModModule } from './tab-mod/tab-mod.module';
+import { TabMatModule } from './tab-mat/tab-mat.module';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { TabModModule } from './tab-mod/tab-mod.module';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    TabModModule
+    TabModModule,
+    TabMatModule
   ],
   providers: [
     provideAnimationsAsync()
