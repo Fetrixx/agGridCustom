@@ -85,6 +85,7 @@ export class TabCompComponent implements AfterViewInit {
   updateSelectedRowCount() {
     this.selectedRowCount = this.selection.selected.length;
   }
+  
 
   rowClick(row: any[], event: MouseEvent) {
     const isCtrlPressed = event.ctrlKey;

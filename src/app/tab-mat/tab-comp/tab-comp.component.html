@@ -107,17 +107,10 @@
             </ng-container>
             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
-
-            <!--
-              (click)="selectRow(row)" [ngClass]="{'selected-row': selectedRowIndex === row.index}"
-            -->
             <mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
               [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"></mat-row>
 
-              <tr *matNoDataRow>
-                <td colspan="10" style="text-align: center;"> <!--No hay datos que coincidan el valor "{{}}" -->
-                </td>
-              </tr>
+              
           </table>
           
         </div>
