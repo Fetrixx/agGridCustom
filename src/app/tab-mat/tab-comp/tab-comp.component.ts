@@ -1,14 +1,19 @@
 /*
 
-todo:
+ocultar las columnas - YA
+seleccion inversa - YA
+
+todo / por hacer:
 
 arreglar exportación
-ocultar las columnas
+
 cambiar el orden de las columnas arrastrandolas
 
 agregar el codigo para cambiar las tablas aggrid y internal desde el selector en app.html
 
-seleccion inversa
+export fix, alternate nam, wand, alternate actor
+all fields that are a  [] or  a {}
+
 
 
 
@@ -58,7 +63,7 @@ export class TabCompComponent implements AfterViewInit {
   private preSortSelection: Set<any[]> = new Set<any[]>(); // Nueva propiedad para almacenar las filas seleccionadas antes de la clasificación
 
 
-  pageSizes: number[] = [5, 10, 20, 50, 100];
+  pageSizes: number[] = [10, 20, 50, 100];
 
   constructor(private http: HttpClient) { }
 
@@ -121,7 +126,7 @@ export class TabCompComponent implements AfterViewInit {
         });
     }*/
 
-
+/*
   loadTableDataSelector() {
     this.http.get<any[]>(this.jsonLink)
       .subscribe(data => {
@@ -137,6 +142,27 @@ export class TabCompComponent implements AfterViewInit {
           }
         }
       });
+  }
+  */
+
+  columnVisibility: { [key: string]: boolean } = {};
+
+  loadTableDataSelector() {
+    this.http.get<any[]>(this.jsonLink)
+      .subscribe(data => {
+        if (data.length > 0) {
+          this.displayedColumns = Object.keys(data[0]);
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
+          });
+          this.dataSource.data = data;
+        }
+      });
+  }
+
+  toggleColumnVisibility(column: string) {
+    this.columnVisibility[column] = !this.columnVisibility[column];
+    this.displayedColumns = Object.keys(this.columnVisibility).filter(column => this.columnVisibility[column]);
   }
 
   adjustSelectionAfterSort() {
@@ -159,7 +185,7 @@ export class TabCompComponent implements AfterViewInit {
   sortChange(event: Sort) {
     this.deselectAllRows();
   }
-  
+
   loadTableDataDirect() {
     this.http.get<any[]>('https://hp-api.onrender.com/api/characters')
       .subscribe(data => {
@@ -183,15 +209,18 @@ export class TabCompComponent implements AfterViewInit {
 
   // Seleccion inversa
   selectAllUnselectedRows() {
-    // Obtener todas las filas de la fuente de datos
-    const allRows = this.dataSource.data;
-    // Filtrar las filas que aún no están seleccionadas
-    const unselectedRows = allRows.filter(row => !this.selection.isSelected(row));
-    // Deseleccionar todas las filas previamente seleccionadas
-    this.selection.clear();
-    // Seleccionar todas las filas que no estaban seleccionadas previamente
-    unselectedRows.forEach(row => this.selection.select(row));
+    if (this.selectedRowCount) {
+      // Obtener todas las filas de la fuente de datos
+      const allRows = this.dataSource.data;
+      // Filtrar las filas que aún no están seleccionadas
+      const unselectedRows = allRows.filter(row => !this.selection.isSelected(row));
+      // Deseleccionar todas las filas previamente seleccionadas
+      this.selection.clear();
+      // Seleccionar todas las filas que no estaban seleccionadas previamente
+      unselectedRows.forEach(row => this.selection.select(row));
+    }
   }
+
 
   deselectAllRows() {
     this.selection.clear();
@@ -267,41 +296,51 @@ export class TabCompComponent implements AfterViewInit {
     // Implementar la exportación a Excel aquí
     let rowsToExport: any[] = [];
 
-  // Verificar si hay elementos seleccionados
-  if (this.selection.selected.length > 0) {
-    // Si se han seleccionado elementos, exportar solo esos elementos
-    rowsToExport = this.selection.selected;
-  } else {
-    // Si no hay elementos seleccionados, exportar toda la tabla
-    rowsToExport = this.dataSource.data;
+    // Verificar si hay elementos seleccionados
+    if (this.selection.selected.length > 0) {
+      // Si se han seleccionado elementos, exportar solo esos elementos
+      rowsToExport = this.selection.selected;
+    } else {
+      // Si no hay elementos seleccionados, exportar toda la tabla
+      rowsToExport = this.dataSource.data;
+    }
+
+    // Filtrar las columnas visibles para la exportación
+    const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
+
+    // Obtener solo los nombres de las columnas visibles
+    const headers = visibleColumns.map(column => column);
+
+    // Crear una matriz para almacenar los datos de las filas seleccionadas
+    const data: any[][] = [];
+    data.push(headers);
+
+    // Agregar datos de las filas seleccionadas
+    rowsToExport.forEach(row => {
+      const rowData = visibleColumns.map(column => row[column]);
+      data.push(rowData);
+    });
+
+    // Crear un libro de Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Agregar la hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Guardar el libro como archivo Excel
+    XLSX.writeFile(workbook, 'table_data.xlsx');
   }
 
-  // Filtrar las columnas visibles para la exportación
-  const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
 
-  // Obtener solo los nombres de las columnas visibles
-  const headers = visibleColumns.map(column => column);
-  
-  // Crear una matriz para almacenar los datos de las filas seleccionadas
-  const data: any[][] = [];
-  data.push(headers);
 
-  // Agregar datos de las filas seleccionadas
-  rowsToExport.forEach(row => {
-    const rowData = visibleColumns.map(column => row[column]);
-    data.push(rowData);
-  });
 
-  // Crear un libro de Excel
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
 
-  // Agregar la hoja al libro
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-  // Guardar el libro como archivo Excel
-  XLSX.writeFile(workbook, 'table_data.xlsx');
-  }
+
+
+
+
 
   exportAllToExcel() {
     // Implementar la exportación de todos los datos a Excel aquí
@@ -311,6 +350,8 @@ export class TabCompComponent implements AfterViewInit {
     // Implementar la lógica para obtener los datos de la fila seleccionada
     this.logSelectedRows();
   }
+
+
 
 
 

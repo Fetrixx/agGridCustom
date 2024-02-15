@@ -9,10 +9,6 @@
     /* Cambia el color de fondo cuando se selecciona una fila */
 }
 
-.mat-header-cell,
-.mat-cell {
-  min-width: 100px; /* Ancho mínimo de las columnas */
-}
 
 .mdc-data-table__cell{
     padding: 0 16px 0 16px;
@@ -23,4 +19,20 @@
 .mdc-data-table__header-cell{
     padding: 0 16px 0 16px;
     font-size: 14px;
+}
+
+.buttons-row{
+    display: table-cell;
+}
+
+.but{
+    font-size: 10px;
+}
+
+
+.card{
+    display: flex;
+  justify-content: center; /* Center the card horizontally */
+  align-items: center; /* Center the card vertically */
+  height: 100vh; /* Make the container occupy the full viewport height */
 }
