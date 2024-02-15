@@ -1,18 +1,19 @@
 /*
+      -- last changes -- 
 
-ocultar las columnas - YA
+ocultar las columnas - YA - mejorar el  "reaparecer" o "it's a feature"
 seleccion inversa - YA
+arreglar exportación - YA- Se formatearon los objetos anidados para representarse como strings.
+export fix, alternate nam, wand, alternate actor
+all fields that are a  [] or  a {}
+
 
 todo / por hacer:
 
-arreglar exportación
-
 cambiar el orden de las columnas arrastrandolas
-
 agregar el codigo para cambiar las tablas aggrid y internal desde el selector en app.html
 
-export fix, alternate nam, wand, alternate actor
-all fields that are a  [] or  a {}
+
 
 
 
@@ -145,8 +146,8 @@ export class TabCompComponent implements AfterViewInit {
   }
   */
 
-  columnVisibility: { [key: string]: boolean } = {};
-
+  // PARA HACER COLUMNAS VISIBLES, FUNDIO EL SORT
+  /*
   loadTableDataSelector() {
     this.http.get<any[]>(this.jsonLink)
       .subscribe(data => {
@@ -159,11 +160,114 @@ export class TabCompComponent implements AfterViewInit {
         }
       });
   }
+  */
 
-  toggleColumnVisibility(column: string) {
-    this.columnVisibility[column] = !this.columnVisibility[column];
-    this.displayedColumns = Object.keys(this.columnVisibility).filter(column => this.columnVisibility[column]);
+  columnVisibility: { [key: string]: boolean } = {};
+
+  // cargar la tabla  (errores con objetos anidados)
+  loadTableDataSelector__() {
+    this.http.get<any[]>(this.jsonLink)
+      .subscribe(data => {
+        if (data.length > 0) {
+          this.displayedColumns = Object.keys(data[0]);
+          this.dataSource.data = data;
+          this.dataSource.paginator = this.paginator;
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
+          }
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
+          });
+        }
+      });
   }
+
+  // maneja de forma basica los objetos con anidacion encontrados en el json
+  loadTableDataSelector______() {
+    this.http.get<any[]>(this.jsonLink)
+      .subscribe(data => {
+        if (data.length > 0) {
+          // Mapear los objetos para convertir los objetos anidados a strings
+          const modifiedData = data.map(item => {
+            const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
+            for (const key in item) {
+              if (typeof item[key] === 'object' && item[key] !== null) {
+                // Si el valor es un objeto, convertirlo a string
+                modifiedItem[key] = JSON.stringify(item[key]);
+              } else {
+                modifiedItem[key] = item[key];
+              }
+            }
+            return modifiedItem;
+          });
+  
+          this.displayedColumns = Object.keys(modifiedData[0]);
+          this.dataSource.data = modifiedData;
+          this.dataSource.paginator = this.paginator;
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
+          }
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
+          });
+        }
+      });
+  }
+
+  loadTableDataSelector() {
+    this.http.get<any[]>(this.jsonLink)
+      .subscribe(data => {
+        if (data.length > 0) {
+          // Función para eliminar caracteres no deseados de objetos anidados
+          const removeBrackets = (value: any) => {
+            if (typeof value === 'object' && value !== null) {
+              return JSON.stringify(value)
+                .replace(/"|\[|\{/g, ' ')
+                .replace(/\]|\}/g, '')
+                
+                
+            } else {
+              return value;
+            }
+          };
+  
+          // Mapear los objetos para convertir los objetos anidados a strings
+          const modifiedData = data.map(item => {
+            const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
+            for (const key in item) {
+              modifiedItem[key] = removeBrackets(item[key]);
+            }
+            return modifiedItem;
+          });
+  
+          this.displayedColumns = Object.keys(modifiedData[0]);
+          this.dataSource.data = modifiedData;
+          this.dataSource.paginator = this.paginator;
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
+          }
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
+          });
+        }
+      });
+  }
+  
+  
+  
+  
+
+  
+  
 
   adjustSelectionAfterSort() {
     if (this.dataSource.sort) {
@@ -231,7 +335,11 @@ export class TabCompComponent implements AfterViewInit {
   }
 
   logSelectedRows() {
-    console.log('Selected Rows:', this.selection.selected);
+    console.log("displayed: "+ this.displayedColumns);
+    console.log("hidden: "+ this.hiddenColumns);
+    //console.log('Selected Rows:', this.selection.selected);
+    console.log(this.displayedColumns.length);
+    
   }
 
   stopPropagation(event: MouseEvent) {
@@ -260,6 +368,36 @@ export class TabCompComponent implements AfterViewInit {
     }
   }
 
+
+  hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas
+
+  // Método para mostrar una columna oculta
+  showColumn(column: string) {
+    const index = this.hiddenColumns.indexOf(column);
+    if (index !== -1) {
+      this.hiddenColumns.splice(index, 1); // Eliminar la columna de las columnas ocultas
+          this.displayedColumns.push(column);
+    }
+  }
+
+  toggleColumnVisibility(column: string) { // hide column
+    const index = this.displayedColumns.indexOf(column);
+    if (index !== -1) {
+      this.displayedColumns.splice(index, 1); // Eliminar la columna de las columnas ocultas
+          this.hiddenColumns.push(column);
+    }
+
+    /*
+    this.hiddenColumns.unshift(column);
+    this.columnVisibility[column] = !this.columnVisibility[column];
+    this.displayedColumns = Object.keys(this.columnVisibility).filter(column => this.columnVisibility[column]);
+    */
+  }
+
+  
+
+  
+  
 
 
 

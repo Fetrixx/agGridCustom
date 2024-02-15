@@ -1,5 +1,6 @@
 
 
+
 <!--div fxLayout="column" fxLayoutGap="10px">
   <mat-form-field fxFlex>
     <mat-label>Buscar</mat-label>
@@ -39,6 +40,19 @@
           <span>test_Log</span>
           </button>
 
+          <button fxFlex style="margin-right: 1%;" mat-raised-button color="warn"
+            (click)="logSelectedRows()">
+          <span>log</span>
+          </button>
+
+          <button mat-raised-button [matMenuTriggerFor]="menu">Mostrar Columnas Ocultas</button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
+                {{ column }}
+              </button>
+            </mat-menu>
+            
+
 
 
           <!--button fxFlex style="margin-right: 1%;" mat-raised-button color="primary" >
@@ -51,6 +65,8 @@
           </button-->
           
         </div>
+
+        
 
         
         <div fxLayout="column" style="margin-top: 1%; margin-bottom: 1%; overflow-x: auto; overflow-y: auto; height: 70vh;">
@@ -98,11 +114,10 @@
             <mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
               [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"></mat-row>
 
-            <!-- Row shown when there is no matching data. -->
-            <tr *matNoDataRow>
-              <td colspan="10" style="text-align: center;"> <!--No hay datos que coincidan el valor "{{}}" -->
-              </td>
-            </tr>
+              <tr *matNoDataRow>
+                <td colspan="10" style="text-align: center;"> <!--No hay datos que coincidan el valor "{{}}" -->
+                </td>
+              </tr>
           </table>
           
         </div>
