@@ -1,11 +1,35 @@
-import { Component, ViewChild, AfterViewInit, HostListener, input, Input } from '@angular/core';
+/*
+
+todo:
+
+arreglar exportación
+ocultar las columnas
+cambiar el orden de las columnas arrastrandolas
+
+agregar el codigo para cambiar las tablas aggrid y internal desde el selector en app.html
+
+seleccion inversa
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+import { Component, ViewChild, AfterViewInit, HostListener, Input } from '@angular/core';
 
 import { SelectionModel } from '@angular/cdk/collections';
 
 import { HttpClient } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 
 
@@ -25,15 +49,6 @@ export class TabCompComponent implements AfterViewInit {
   selectedRowIndex = -1; // Inicialmente ninguna fila seleccionada
   selectedRowCount: number = 0;
 
-  
-
-
-
-  /*
-  @ViewChild(MatSort)
-  sort: MatSort = new MatSort;
-  */
-
   @ViewChild(MatSort, { static: true }) sort: MatSort | null = null;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator | null = null;
   //@ViewChild('paginator') paginator: MatPaginator | null = null;
@@ -51,7 +66,7 @@ export class TabCompComponent implements AfterViewInit {
     this.loadTableDataSelector();
   }
 
-  
+
 
   @HostListener('document:keydown.escape', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -89,21 +104,62 @@ export class TabCompComponent implements AfterViewInit {
     this.updateSelectedRowCount()
   }
 
+
+  /*
+    loadTableDataSelector() {
+      this.http.get<any[]>(this.jsonLink)
+        .subscribe(data => {
+          if (data.length > 0) {
+            this.displayedColumns = Object.keys(data[0]);
+            this.dataSource.data = data;
+            this.dataSource.paginator = this.paginator
+            if (this.sort) {
+              this.dataSource.sort = this.sort; // Asignar MatSort a MatTableDataSource si sort no es null
+            }
+  
+          }
+        });
+    }*/
+
+
   loadTableDataSelector() {
     this.http.get<any[]>(this.jsonLink)
       .subscribe(data => {
         if (data.length > 0) {
           this.displayedColumns = Object.keys(data[0]);
           this.dataSource.data = data;
-          this.dataSource.paginator = this.paginator
+          this.dataSource.paginator = this.paginator;
           if (this.sort) {
-            this.dataSource.sort = this.sort; // Asignar MatSort a MatTableDataSource si sort no es null
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
           }
-
         }
       });
   }
 
+  adjustSelectionAfterSort() {
+    if (this.dataSource.sort) {
+      const newData = this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort);
+      const newSelection = [];
+      for (const item of newData) {
+        if (this.preSortSelection.has(item)) {
+          newSelection.push(item);
+        }
+      }
+      this.selection.clear();
+      for (const item of newSelection) {
+        this.selection.select(item);
+      }
+    }
+
+  }
+
+  sortChange(event: Sort) {
+    this.deselectAllRows();
+  }
+  
   loadTableDataDirect() {
     this.http.get<any[]>('https://hp-api.onrender.com/api/characters')
       .subscribe(data => {
@@ -123,7 +179,7 @@ export class TabCompComponent implements AfterViewInit {
     this.selectedRowIndex = row.index; // Actualiza el índice de la fila seleccionada
   }
 
-  
+
 
   // Seleccion inversa
   selectAllUnselectedRows() {
@@ -146,22 +202,39 @@ export class TabCompComponent implements AfterViewInit {
   }
 
   logSelectedRows() {
-    console.log('Selected Rows:', this.selection.selected);    
+    console.log('Selected Rows:', this.selection.selected);
   }
-  
-  stopPropagation(event: MouseEvent){
-    event.stopPropagation();
-}
 
-  applyFilter(event: Event) {
+  stopPropagation(event: MouseEvent) {
+    event.stopPropagation();
+  }
+
+  /*
+    applyFilter(event: Event) {
+      const filterValue = (event.target as HTMLInputElement).value;
+      this.dataSource.filter = filterValue.trim().toLowerCase();
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
+    }
+    */
+
+  applyFilter(event: Event, columnName: string) {
     const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
+      const dataStr = data[columnName].toLowerCase();
+      return dataStr.indexOf(filter) !== -1;
+    };
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
   }
 
-  
+
+
+
+
 
 
   /*
@@ -192,6 +265,42 @@ export class TabCompComponent implements AfterViewInit {
 
   exportToExcel() {
     // Implementar la exportación a Excel aquí
+    let rowsToExport: any[] = [];
+
+  // Verificar si hay elementos seleccionados
+  if (this.selection.selected.length > 0) {
+    // Si se han seleccionado elementos, exportar solo esos elementos
+    rowsToExport = this.selection.selected;
+  } else {
+    // Si no hay elementos seleccionados, exportar toda la tabla
+    rowsToExport = this.dataSource.data;
+  }
+
+  // Filtrar las columnas visibles para la exportación
+  const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
+
+  // Obtener solo los nombres de las columnas visibles
+  const headers = visibleColumns.map(column => column);
+  
+  // Crear una matriz para almacenar los datos de las filas seleccionadas
+  const data: any[][] = [];
+  data.push(headers);
+
+  // Agregar datos de las filas seleccionadas
+  rowsToExport.forEach(row => {
+    const rowData = visibleColumns.map(column => row[column]);
+    data.push(rowData);
+  });
+
+  // Crear un libro de Excel
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+  // Agregar la hoja al libro
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+  // Guardar el libro como archivo Excel
+  XLSX.writeFile(workbook, 'table_data.xlsx');
   }
 
   exportAllToExcel() {
@@ -203,7 +312,7 @@ export class TabCompComponent implements AfterViewInit {
     this.logSelectedRows();
   }
 
-  
+
 
   sizeToFit() {
     // Implementar la lógica para ajustar el tamaño de las columnas

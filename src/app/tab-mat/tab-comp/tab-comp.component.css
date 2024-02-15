@@ -8,3 +8,19 @@
     background-color: lightblue;
     /* Cambia el color de fondo cuando se selecciona una fila */
 }
+
+.mat-header-cell,
+.mat-cell {
+  min-width: 100px; /* Ancho mínimo de las columnas */
+}
+
+.mdc-data-table__cell{
+    padding: 0 16px 0 16px;
+    font-size: 12px;
+}
+
+
+.mdc-data-table__header-cell{
+    padding: 0 16px 0 16px;
+    font-size: 14px;
+}
