@@ -57,23 +57,34 @@
             <span> Mostrar Columnas </span>
           </button>
 
-          <button mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
-            <mat-icon fontIcon="visibility"></mat-icon>
-            <span> Columnas </span>
-          </button>
-          
           <mat-menu #columnas="matMenu"> <!-- menu a activar -->
             <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
               <span> {{ column }} </span>
             </button>
           </mat-menu>
 
-          <mat-menu #columnasVer="matMenu"> <!-- menu a activar -->
-            <button mat-menu-item *ngFor="let column of allColumns" (click)="toggleColumnVisibility(column)">
-              <span> {{ column }} </span>
-            </button >
-            
+          <button mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
+            <mat-icon fontIcon="visibility"></mat-icon>
+            <span> Columnas </span>
+          </button>
+          
+          
+
+         
+          
+          <mat-menu #columnasVer="matMenu"> 
+            <ng-container *ngFor="let column of allColumns">
+              <button mat-menu-item (click)="$event.stopPropagation()">
+                <mat-checkbox 
+                  (click)="toggleColumnVisibility(column); $event.stopPropagation()">
+                  {{ column }}
+                </mat-checkbox>
+              </button>
+            </ng-container>
           </mat-menu>
+          
+
+          
 
 
 

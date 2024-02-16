@@ -412,7 +412,7 @@ console.log(this.displayedColumns);
     }
   }
 
-  toggleColumnVisibility__(column: string) {
+  toggleColumnVisibility(column: string) {
     const indexInDisplayed = this.displayedColumns.indexOf(column);
     const indexInHidden = this.hiddenColumns.indexOf(column);
 
@@ -428,8 +428,12 @@ console.log(this.displayedColumns);
 
   }
 
+  
+
+  /*
+
    // Mostrar u ocultar columnas según los checkboxes
-   toggleColumnVisibility(column: string) {
+   toggleColumnVisibilityNew(column: string) {
     const control = this.columnsFormGroup.get(column);
     if (control) {
       if (control.value) {
@@ -458,7 +462,7 @@ console.log(this.displayedColumns);
       this.displayedColumns.splice(index, 1);
       this.hiddenColumns.push(column);
     }
-  }
+  }*/
 
 
 
