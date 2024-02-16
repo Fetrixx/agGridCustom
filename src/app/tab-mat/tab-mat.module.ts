@@ -36,6 +36,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
+
+
+import { AgGridAngular } from 'ag-grid-angular';
+import { AgGridModule } from 'ag-grid-angular';
+
+
+
+
 @NgModule({
   declarations: [
     TabCompComponent
@@ -67,7 +75,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     ScrollingModule,
     CdkTableModule,
     CdkTreeModule,
-    A11yModule
+    A11yModule,
+
+
+    AgGridAngular,
+    AgGridModule
+
+
+
+
+
+
+    
 
   ],
   exports: [

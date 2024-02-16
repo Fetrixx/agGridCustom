@@ -44,21 +44,21 @@ export class TabCompComponent {
 
 
 
-  updateSelectedRowCount() {
+  updateSelectedRowCount_Ag() {
     this.selectedRowCount = this.gridApi.getSelectedRows().length;
   }
 
   ngOnInit() {
-    this.loadGridData();
+    this.loadGridData_Ag();
   }
 
   @Input() jsonLink: string = '';
 
-  loadGridData() {
+  loadGridData_Ag() {
     // json for test: https://hp-api.onrender.com/
     this.http.get<any[]>(this.jsonLink) // json file here
       .subscribe(data => {
-        this.columnDefs = this.generateColumnDefs(data);
+        this.columnDefs = this.generateColumnDefs_Ag(data);
         this.rowData = data;
       });
   }
@@ -66,7 +66,7 @@ export class TabCompComponent {
   
 
 
-  private generateColumnDefs(data: any[]): ColDef[] {
+  private generateColumnDefs_Ag(data: any[]): ColDef[] {
     if (data.length === 0) {
       return [];
     }
@@ -77,8 +77,8 @@ export class TabCompComponent {
   }
 
   
-  exportToExcel() { // exportar seleccion
-    const selectedData = this.getSelectedRowData();
+  exportToExcel_Ag() { // exportar seleccion
+    const selectedData = this.getSelectedRowData_Ag();
     if (selectedData.length === 0) {
       alert("No se han seleccionado elementos para exportar.");
       return;
@@ -104,7 +104,7 @@ export class TabCompComponent {
 
   
   
-  exportAllToExcel() {
+  exportAllToExcel_Ag() {
   const now = new Date();
     const day = now.getDate().toString().padStart(2, '0');
     const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Los meses comienzan desde 0
@@ -123,20 +123,20 @@ export class TabCompComponent {
 
   
 
-  getSelectedRowData() {
+  getSelectedRowData_Ag() {
     const selectedData = this.gridApi.getSelectedRows();
     console.log(selectedData);
     
     return selectedData;
   }
 
-  onGridReady(params: GridReadyEvent) {
+  onGridReady_Ag(params: GridReadyEvent) {
     this.gridApi = params.api;
-    this.gridApi.addEventListener('selectionChanged', this.updateSelectedRowCount.bind(this));
+    this.gridApi.addEventListener('selectionChanged', this.updateSelectedRowCount_Ag.bind(this));
   }
 
   
-  sizeToFit(){
+  sizeToFit_Ag(){
     this.gridApi.autoSizeAllColumns(); // <-- Autoajuste de columnas al cargar el grid
   }
 

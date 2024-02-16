@@ -24,7 +24,6 @@ import {MatTableModule} from '@angular/material/table';
   imports: [
     CommonModule,
     AgGridAngular,
-    TableModule,
     HttpClientModule,
     AgGridModule,
     MatButtonModule,

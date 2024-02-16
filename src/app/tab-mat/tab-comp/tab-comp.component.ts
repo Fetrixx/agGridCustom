@@ -41,6 +41,7 @@ import { MatSort, Sort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community';
 
 
 
@@ -52,6 +53,8 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 export class TabCompComponent implements AfterViewInit {
 
   @Input() jsonLink: string = '';
+  @Input() tabla: string = '';
+
 
   displayedColumns: string[] = [];
   allColumns: string[] = [];
@@ -757,6 +760,176 @@ export class TabCompComponent implements AfterViewInit {
 
 
 
+
+  // ---------------------------------------------------------------------------------- AG GRID SECTION ---------------------------------------------------------------------------------- 
+
+  /*
+  displayedColumns: string[] = [];
+  dataSource: any[] = [];
+  selectedRowCount: number = 0;*/
+
+  
+  private gridApi!: GridApi;
+  gridOptions: GridOptions = {
+  
+  }
+
+
+
+  // sets 10 rows per page (default is 100)
+  paginationPageSize = 20; //
+  
+  // allows the user to select the page size from a predefined list of page sizes
+  paginationPageSizeSelector = [20, 50, 100];
+  
+  columnDefs: ColDef[] = [];
+  rowData: any[] = [];
+  
+
+  updateSelectedRowCount_Ag() {
+    this.selectedRowCount = this.gridApi.getSelectedRows().length;
+  }
+
+  ngOnInit() {
+    this.loadGridData_Ag();
+  }
+
+  loadGridData_Ag() {
+    // json for test: https://hp-api.onrender.com/
+    this.http.get<any[]>(this.jsonLink) // json file here
+      .subscribe(data => {
+        this.columnDefs = this.generateColumnDefs_Ag(data);
+        this.rowData = data;
+      });
+  }
+
+  
+
+
+  private generateColumnDefs_Ag(data: any[]): ColDef[] {
+    if (data.length === 0) {
+      return [];
+    }
+
+    return Object.keys(data[0]).map(key => {
+      return { headerName: key, field: key, filter:true, sortable: true, resizable: true, autoHeight: true}; //, valueParser:String
+    });
+  }
+
+  
+  exportToExcel_Ag() { // exportar seleccion
+    const selectedData = this.getSelectedRowData_Ag();
+    if (selectedData.length === 0) {
+      alert("No se han seleccionado elementos para exportar.");
+      return;
+    }
+  
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Los meses comienzan desde 0
+    const year = now.getFullYear().toString();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const fileName = `Tabla Exportada ${day}-${month}-${year}  ${hours}.${minutes}.${seconds}.xlsx`;
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(selectedData);
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+  
+    XLSX.writeFile(workbook, fileName);
+  }
+
+  
+  
+
+  
+  
+  exportAllToExcel_Ag() {
+  const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Los meses comienzan desde 0
+    const year = now.getFullYear().toString();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const fileName = `Tabla Exportada ${day}-${month}-${year}  ${hours}.${minutes}.${seconds}.xlsx`;
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.rowData);
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    XLSX.writeFile(workbook, fileName);
+  
+    this.gridApi.exportDataAsExcel
+  }
+
+
+  
+
+  getSelectedRowData_Ag() {
+    const selectedData = this.gridApi.getSelectedRows();
+    console.log(selectedData);
+    
+    return selectedData;
+  }
+
+  onGridReady_Ag(params: GridReadyEvent) {
+    this.gridApi = params.api;
+    this.gridApi.addEventListener('selectionChanged', this.updateSelectedRowCount_Ag.bind(this));
+  }
+
+  
+  sizeToFit_Ag(){
+    this.gridApi.autoSizeAllColumns(); // <-- Autoajuste de columnas al cargar el grid
+  }
+
+  
+
+  
+  
+
+  ag_Grid_Locale_es = {
+    // for filter panel
+    page: 'Página',
+    more: 'Más',
+    to: 'a',
+    of: 'de',
+    next: 'Siguente',
+    last: 'Último',
+    first: 'Primero',
+    previous: 'Anterior',
+    loadingOoo: 'Cargando...',
+  
+    // for set filter
+    selectAll: 'Seleccionar Todo',
+    searchOoo: 'Buscar...',
+    blank: 'En blanco',
+    notBlank: 'No en blanco',
+  
+    // for number filter and text filter
+    filterOoo: 'Filtrar',
+    applyFilter: 'Aplicar Filtro...',
+    equals: 'Igual',
+    notEqual: 'No Igual',
+  
+    // for number filter
+    lessThan: 'Menos que',
+    greaterThan: 'Mayor que',
+    lessThanOrEqual: 'Menos o igual que',
+    greaterThanOrEqual: 'Mayor o igual que',
+    inRange: 'En rango de',
+  
+    // for text filter
+    contains: 'Contiene',
+    notContains: 'No contiene',
+    startsWith: 'Empieza con',
+    endsWith: 'Termina con',
+  
+    // filter conditions
+    andCondition: 'Y',
+    orCondition: 'O',
+
+    // other
+    noRowsToShow: 'No hay filas para mostrar',
+  
+  }
 
 }
 

@@ -8,19 +8,19 @@
   
           <div fxLayout="row" fxLayoutGap="10px">
 
-            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportToExcel()">
+            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="exportToExcel_Ag()">
                 <mat-icon fontIcon="file_download"></mat-icon> 
                 Exportar Seleccion a Excel
             </button>
-            <button style="margin-right: 1%;" mat-raised-button color="primary"(click)="exportAllToExcel()"> 
+            <button style="margin-right: 1%;" mat-raised-button color="primary"(click)="exportAllToExcel_Ag()"> 
                 <mat-icon fontIcon="file_download"></mat-icon>
                 Exportar Todo a Excel
             </button>
-            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="sizeToFit()">
+            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="sizeToFit_Ag()">
                 <mat-icon fontIcon="swap_horiz"></mat-icon>
                 Ajustar Columnas
             </button>
-            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="loadGridData()">
+            <button style="margin-right: 1%;" mat-raised-button color="primary" (click)="loadGridData_Ag()">
                 <mat-icon  fontIcon="refresh"></mat-icon> Refrescar
             </button>
             
@@ -29,7 +29,7 @@
             
             
 
-            <button style="margin-right: 1%;" mat-raised-button color="warn" (click)="getSelectedRowData()">test_Log</button>
+            <button style="margin-right: 1%;" mat-raised-button color="warn" (click)="getSelectedRowData_Ag()">test_Log</button>
           </div>
 
           <div fxLayout="column" style="margin-top: 1% ; margin-bottom: 1% ;  ">
@@ -48,7 +48,7 @@
                 [rowSelection]="'multiple'"
                 [suppressDragLeaveHidesColumns]="false"  
                 [localeText]="ag_Grid_Locale_es"
-                (gridReady)="onGridReady($event)"
+                (gridReady)="onGridReady_Ag($event)"
                 
         
                 >
