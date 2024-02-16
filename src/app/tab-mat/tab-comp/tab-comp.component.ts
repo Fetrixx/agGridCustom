@@ -8,6 +8,8 @@ export fix, alternate nam, wand, alternate actor
 all fields that are a  [] or  a {}
 cambiar el orden de las columnas arrastrandolas - YA
 
+
+
 todo / por hacer:
 
 
@@ -43,7 +45,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 
 @Component({
-  selector: 'app-tab-mat-comp',
+  selector: 'tabla-nativa',
   templateUrl: './tab-comp.component.html',
   styleUrl: './tab-comp.component.css'
 })
@@ -57,6 +59,7 @@ export class TabCompComponent implements AfterViewInit {
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>();
   selectedRowIndex = -1; // Inicialmente ninguna fila seleccionada
   selectedRowCount: number = 0;
+
 
   @ViewChild(MatSort, { static: true }) sort: MatSort | null = null;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator | null = null;
@@ -224,10 +227,13 @@ export class TabCompComponent implements AfterViewInit {
       });
   }
 
-  
+
   columnsFormGroup!: FormGroup;
 
-  loadTableDataSelector() {
+  
+
+  /*
+  loadTableDataSelector__pre 15:25 del 16_2_24() {
     this.http.get<any[]>(this.jsonLink)
       .subscribe(data => {
         if (data.length > 0) {
@@ -273,10 +279,72 @@ export class TabCompComponent implements AfterViewInit {
             group[column] = new FormControl(true); // Todos inicialmente marcados como visibles
           });
           this.columnsFormGroup = this.formBuilder.group(group);
-          
+
+        }
+      });
+  }*/
+
+  formatColumnName(columnName: string): string {
+    // Reemplazar guiones bajos con espacios
+    let formattedName = columnName.replace(/_/g, ' ');
+    
+    // Insertar espacios entre letras minúsculas y mayúsculas
+    formattedName = formattedName.replace(/([a-z])([A-Z])/g, '$1 $2');
+    
+    // Convertir la primera letra de cada palabra a mayúscula
+    formattedName = formattedName.replace(/\b\w/g, firstChar => firstChar.toUpperCase());
+    
+    return formattedName;
+  }
+
+  loadTableDataSelector() { // post 15:25 del 16_2_24
+    this.http.get<any[]>(this.jsonLink)
+      .subscribe(data => {
+        if (data.length > 0) {
+          // Función para eliminar caracteres no deseados de objetos anidados
+          const removeBrackets = (value: any) => {
+            if (typeof value === 'object' && value !== null) {
+              return JSON.stringify(value)
+                .replace(/"|\[|\{/g, ' ')
+                .replace(/\]|\}/g, '');
+            } else {
+              return value;
+            }
+          };
+  
+          // Mapear los objetos para convertir los objetos anidados a strings
+          const modifiedData = data.map(item => {
+            const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
+            for (const key in item) {
+              modifiedItem[this.formatColumnName(key)] = removeBrackets(item[key]);
+            }
+            return modifiedItem;
+          });
+  
+          this.displayedColumns = Object.keys(modifiedData[0]);
+          this.allColumns = Object.keys(modifiedData[0]);
+          this.dataSource.data = modifiedData;
+          this.dataSource.paginator = this.paginator;
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
+          }
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
+          });
+  
+          // Construir FormGroup dinámicamente
+          const group: any = {};
+          this.displayedColumns.forEach(column => {
+            group[column] = new FormControl(true); // Todos inicialmente marcados como visibles
+          });
+          this.columnsFormGroup = this.formBuilder.group(group);
         }
       });
   }
+  
 
 
 
@@ -361,7 +429,7 @@ export class TabCompComponent implements AfterViewInit {
     //console.log('Selected Rows:', this.selection.selected);
     console.log(this.displayedColumns.length);
 */
-console.log(this.displayedColumns);
+    console.log(this.displayedColumns);
 
   }
 
@@ -394,12 +462,14 @@ console.log(this.displayedColumns);
 
   hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas
 
+
   // Método para mostrar una columna oculta
   showColumn(column: string) {
     const index = this.hiddenColumns.indexOf(column);
     if (index !== -1) {
       this.hiddenColumns.splice(index, 1); // Eliminar la columna de las columnas ocultas
-      this.displayedColumns.push(column);
+      //this.displayedColumns.push(column);
+      this.displayedColumns.splice(0, 0, column); // Agregar la columna al principio del array
     }
   }
 
@@ -418,17 +488,18 @@ console.log(this.displayedColumns);
 
     if (indexInDisplayed !== -1) {
       // La columna está actualmente visible, así que la ocultamos
-      this.displayedColumns.splice(indexInDisplayed, 1);
-      this.hiddenColumns.push(column);
+      this.hideColumn(column);
+      /*this.displayedColumns.splice(indexInDisplayed, 1);
+      this.hiddenColumns.push(column);*/
     } else if (indexInHidden !== -1) {
       // La columna está actualmente oculta, así que la mostramos
-      this.hiddenColumns.splice(indexInHidden, 1);
-      this.displayedColumns.push(column);
+      this.showColumn(column);
+      /*this.hiddenColumns.splice(indexInHidden, 1);
+      this.displayedColumns.push(column);*/
     }
 
   }
 
-  
 
   /*
 

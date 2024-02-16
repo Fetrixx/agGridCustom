@@ -1,9 +1,4 @@
 
-<!--app-tab-comp>
-
-
-
-</app-tab-comp-->
 
 
 
@@ -20,5 +15,20 @@
 https://hp-api.onrender.com/api/characters
 https://hp-api.onrender.com/api/spells
 
--->
+
+<app-tab-comp></app-tab-comp>
+
 <app-tab-mat-comp [jsonLink] = "'https://hp-api.onrender.com/api/characters'">  </app-tab-mat-comp>
+
+
+-->
+
+
+
+<tabla-nativa [jsonLink]="'https://hp-api.onrender.com/api/characters'" >
+
+</tabla-nativa>
+
+<tabla-ag-grid [jsonLink]="'https://hp-api.onrender.com/api/characters'" >
+
+</tabla-ag-grid>

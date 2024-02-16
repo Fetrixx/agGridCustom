@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { ColDef, GridOptions, GridReadyEvent, GridApi } from 'ag-grid-community'; // Column Definition Type Interface
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import * as XLSX from 'xlsx';
@@ -10,7 +10,7 @@ import { SelectionChangedEvent } from 'ag-grid-community';
 
 
 @Component({
-  selector: 'app-tab-comp',
+  selector: 'tabla-ag-grid',
   templateUrl: './tab-comp.component.html',
   styleUrl: './tab-comp.component.css',
   
@@ -52,9 +52,11 @@ export class TabCompComponent {
     this.loadGridData();
   }
 
+  @Input() jsonLink: string = '';
+
   loadGridData() {
     // json for test: https://hp-api.onrender.com/
-    this.http.get<any[]>('https://hp-api.onrender.com/api/characters') // json file here
+    this.http.get<any[]>(this.jsonLink) // json file here
       .subscribe(data => {
         this.columnDefs = this.generateColumnDefs(data);
         this.rowData = data;

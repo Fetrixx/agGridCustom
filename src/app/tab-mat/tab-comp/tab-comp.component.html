@@ -22,6 +22,7 @@
   <div>
     <mat-card style="margin: 2%"> <!--class="card"-->
       <mat-card-content>
+
         <div fxLayout="row" fxLayoutGap="10px" class="buttons-row">
 
           <button fxFlex matTooltip="Exporta las filas seleccionadas, si no hay selección, se exporta toda la tabla."
@@ -33,13 +34,13 @@
             </span>
           </button>
           <button fxFlex matTooltip="Vuelve a cargar la tabla, anulando los cambios realizados a la vista."
-          [matTooltipShowDelay]="'1500'" style="margin-right: 1%;" mat-raised-button color="primary" (click)="loadTableDataSelector();">
+            [matTooltipShowDelay]="'1500'" style="margin-right: 1%;" mat-raised-button color="primary"
+            (click)="loadTableDataSelector();">
             <mat-icon fontIcon="refresh"></mat-icon>
             <span>Refrescar</span>
           </button>
-          <button fxFlex matTooltip="Invierte la selección de filas en la tabla."
-          [matTooltipShowDelay]="'1500'" style="margin-right: 1%;" mat-raised-button color="primary"
-            (click)="selectAllUnselectedRows();">
+          <button fxFlex matTooltip="Invierte la selección de filas en la tabla." [matTooltipShowDelay]="'1500'"
+            style="margin-right: 1%;" mat-raised-button color="primary" (click)="selectAllUnselectedRows();">
             <mat-icon fontIcon="compare_arrows"></mat-icon>
             <span>Seleccion Inversa</span>
           </button>
@@ -64,27 +65,26 @@
           </mat-menu>
 
           <button mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
-            <mat-icon fontIcon="visibility"></mat-icon>
-            <span> Columnas </span>
+            <mat-icon fontIcon="visibility_off"></mat-icon>
+            <span> Ocultar </span>
           </button>
-          
-          
 
-         
-          
-          <mat-menu #columnasVer="matMenu"> 
+
+
+
+
+          <mat-menu #columnasVer="matMenu">
             <ng-container *ngFor="let column of allColumns">
               <button mat-menu-item (click)="$event.stopPropagation()">
-                <mat-checkbox 
-                  (click)="toggleColumnVisibility(column); $event.stopPropagation()">
+                <mat-checkbox (click)="toggleColumnVisibility(column); $event.stopPropagation()">
                   {{ column }}
                 </mat-checkbox>
               </button>
             </ng-container>
           </mat-menu>
-          
 
-          
+
+
 
 
 
@@ -108,14 +108,13 @@
 
           <table mat-table [dataSource]="dataSource" matSort style="user-select: none; overflow: auto;"
             (matSortChange)="sortChange($event)" cdkDropList cdkDropListOrientation="horizontal"
-            (cdkDropListDropped)="drop($event)" > <!-- Tabla -->
-            
+            (cdkDropListDropped)="drop($event)"> <!-- Tabla -->
+
             <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
 
 
-              <mat-header-cell cdkDrag sticky *matHeaderCellDef 
-              [cdkDragData]="col" 
-              mat-sort-header arrowPosition="before"
+              <mat-header-cell cdkDrag sticky *matHeaderCellDef [cdkDragData]="col" mat-sort-header
+                arrowPosition="before"
                 style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; width: 15em; position: sticky; ">
                 <!-- ancho de columnas -->
 
@@ -139,7 +138,7 @@
                     </mat-form-field>
                   </div>
                 </button>
-                <button mat-menu-item (click)="hideColumn(col)">
+                <button mat-menu-item (click)="toggleColumnVisibility(col)">
                   <mat-icon>visibility_off</mat-icon>
                   <span>Ocultar Columna</span>
                 </button>
@@ -151,7 +150,7 @@
             </ng-container>
             <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
-            <mat-row  *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
+            <mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
               [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"></mat-row>
 
 
