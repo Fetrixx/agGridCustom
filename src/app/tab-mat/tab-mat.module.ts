@@ -32,6 +32,7 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import {CdkTableModule} from '@angular/cdk/table';
 import {CdkTreeModule} from '@angular/cdk/tree';
 import {A11yModule} from '@angular/cdk/a11y';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @NgModule({
@@ -58,6 +59,7 @@ import {A11yModule} from '@angular/cdk/a11y';
     MatSortModule,
     MatInputModule,
     FlexLayoutModule,
+    MatTooltipModule,
     
     DragDropModule,
     ScrollingModule,

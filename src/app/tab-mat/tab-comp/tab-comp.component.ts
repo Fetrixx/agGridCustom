@@ -6,11 +6,11 @@ seleccion inversa - YA
 arreglar exportación - YA- Se formatearon los objetos anidados para representarse como strings.
 export fix, alternate nam, wand, alternate actor
 all fields that are a  [] or  a {}
-
+cambiar el orden de las columnas arrastrandolas - YA
 
 todo / por hacer:
 
-cambiar el orden de las columnas arrastrandolas
+
 agregar el codigo para cambiar las tablas aggrid y internal desde el selector en app.html
 
 
@@ -37,6 +37,8 @@ import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 
 
@@ -50,6 +52,7 @@ export class TabCompComponent implements AfterViewInit {
   @Input() jsonLink: string = '';
 
   displayedColumns: string[] = [];
+  allColumns: string[] = [];
   //dataSource: any[] = [];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>();
   selectedRowIndex = -1; // Inicialmente ninguna fila seleccionada
@@ -66,7 +69,7 @@ export class TabCompComponent implements AfterViewInit {
 
   pageSizes: number[] = [10, 20, 50, 100];
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private formBuilder: FormBuilder) { }
 
   ngAfterViewInit() {
     this.loadTableDataSelector();
@@ -85,7 +88,7 @@ export class TabCompComponent implements AfterViewInit {
   updateSelectedRowCount() {
     this.selectedRowCount = this.selection.selected.length;
   }
-  
+
 
   rowClick(row: any[], event: MouseEvent) {
     const isCtrlPressed = event.ctrlKey;
@@ -128,24 +131,24 @@ export class TabCompComponent implements AfterViewInit {
         });
     }*/
 
-/*
-  loadTableDataSelector() {
-    this.http.get<any[]>(this.jsonLink)
-      .subscribe(data => {
-        if (data.length > 0) {
-          this.displayedColumns = Object.keys(data[0]);
-          this.dataSource.data = data;
-          this.dataSource.paginator = this.paginator;
-          if (this.sort) {
-            this.dataSource.sort = this.sort;
-            this.dataSource.sort.sortChange.subscribe(() => {
-              this.adjustSelectionAfterSort();
-            });
+  /*
+    loadTableDataSelector() {
+      this.http.get<any[]>(this.jsonLink)
+        .subscribe(data => {
+          if (data.length > 0) {
+            this.displayedColumns = Object.keys(data[0]);
+            this.dataSource.data = data;
+            this.dataSource.paginator = this.paginator;
+            if (this.sort) {
+              this.dataSource.sort = this.sort;
+              this.dataSource.sort.sortChange.subscribe(() => {
+                this.adjustSelectionAfterSort();
+              });
+            }
           }
-        }
-      });
-  }
-  */
+        });
+    }
+    */
 
   // PARA HACER COLUMNAS VISIBLES, FUNDIO EL SORT
   /*
@@ -204,7 +207,7 @@ export class TabCompComponent implements AfterViewInit {
             }
             return modifiedItem;
           });
-  
+
           this.displayedColumns = Object.keys(modifiedData[0]);
           this.dataSource.data = modifiedData;
           this.dataSource.paginator = this.paginator;
@@ -220,6 +223,9 @@ export class TabCompComponent implements AfterViewInit {
         }
       });
   }
+
+  
+  columnsFormGroup!: FormGroup;
 
   loadTableDataSelector() {
     this.http.get<any[]>(this.jsonLink)
@@ -231,13 +237,13 @@ export class TabCompComponent implements AfterViewInit {
               return JSON.stringify(value)
                 .replace(/"|\[|\{/g, ' ')
                 .replace(/\]|\}/g, '')
-                
-                
+
+
             } else {
               return value;
             }
           };
-  
+
           // Mapear los objetos para convertir los objetos anidados a strings
           const modifiedData = data.map(item => {
             const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
@@ -246,8 +252,9 @@ export class TabCompComponent implements AfterViewInit {
             }
             return modifiedItem;
           });
-  
+
           this.displayedColumns = Object.keys(modifiedData[0]);
+          this.allColumns = Object.keys(modifiedData[0]);
           this.dataSource.data = modifiedData;
           this.dataSource.paginator = this.paginator;
           if (this.sort) {
@@ -259,16 +266,24 @@ export class TabCompComponent implements AfterViewInit {
           this.displayedColumns.forEach(column => {
             this.columnVisibility[column] = true; // Inicialmente todas las columnas visibles
           });
+
+          // Construir FormGroup dinámicamente
+          const group: any = {};
+          this.displayedColumns.forEach(column => {
+            group[column] = new FormControl(true); // Todos inicialmente marcados como visibles
+          });
+          this.columnsFormGroup = this.formBuilder.group(group);
+          
         }
       });
   }
-  
-  
-  
-  
 
-  
-  
+
+
+
+
+
+
 
   adjustSelectionAfterSort() {
     if (this.dataSource.sort) {
@@ -336,11 +351,18 @@ export class TabCompComponent implements AfterViewInit {
   }
 
   logSelectedRows() {
-    console.log("displayed: "+ this.displayedColumns);
-    console.log("hidden: "+ this.hiddenColumns);
+    console.log('Selected Rows:', this.selection.selected);
+
+  }
+
+  testLog() {
+    /*console.log("displayed: " + this.displayedColumns);
+    console.log("hidden: " + this.hiddenColumns);
     //console.log('Selected Rows:', this.selection.selected);
     console.log(this.displayedColumns.length);
-    
+*/
+console.log(this.displayedColumns);
+
   }
 
   stopPropagation(event: MouseEvent) {
@@ -377,28 +399,76 @@ export class TabCompComponent implements AfterViewInit {
     const index = this.hiddenColumns.indexOf(column);
     if (index !== -1) {
       this.hiddenColumns.splice(index, 1); // Eliminar la columna de las columnas ocultas
-          this.displayedColumns.push(column);
+      this.displayedColumns.push(column);
     }
   }
 
-  toggleColumnVisibility(column: string) { // hide column
+
+  hideColumn(column: string) { // hide column
     const index = this.displayedColumns.indexOf(column);
     if (index !== -1) {
       this.displayedColumns.splice(index, 1); // Eliminar la columna de las columnas ocultas
-          this.hiddenColumns.push(column);
+      this.hiddenColumns.push(column);
     }
-
-    /*
-    this.hiddenColumns.unshift(column);
-    this.columnVisibility[column] = !this.columnVisibility[column];
-    this.displayedColumns = Object.keys(this.columnVisibility).filter(column => this.columnVisibility[column]);
-    */
   }
 
-  
+  toggleColumnVisibility__(column: string) {
+    const indexInDisplayed = this.displayedColumns.indexOf(column);
+    const indexInHidden = this.hiddenColumns.indexOf(column);
 
-  
-  
+    if (indexInDisplayed !== -1) {
+      // La columna está actualmente visible, así que la ocultamos
+      this.displayedColumns.splice(indexInDisplayed, 1);
+      this.hiddenColumns.push(column);
+    } else if (indexInHidden !== -1) {
+      // La columna está actualmente oculta, así que la mostramos
+      this.hiddenColumns.splice(indexInHidden, 1);
+      this.displayedColumns.push(column);
+    }
+
+  }
+
+   // Mostrar u ocultar columnas según los checkboxes
+   toggleColumnVisibility(column: string) {
+    const control = this.columnsFormGroup.get(column);
+    if (control) {
+      if (control.value) {
+        // Si el checkbox está marcado, mostrar la columna
+        this.showColumnCheck(column);
+      } else {
+        // Si el checkbox está desmarcado, ocultar la columna
+        this.hideColumnCheck(column);
+      }
+    }
+  }
+
+  // Método para mostrar una columna
+  showColumnCheck(column: string) {
+    const index = this.hiddenColumns.indexOf(column);
+    if (index !== -1) {
+      this.hiddenColumns.splice(index, 1);
+      this.displayedColumns.push(column);
+    }
+  }
+
+  // Método para ocultar una columna
+  hideColumnCheck(column: string) {
+    const index = this.displayedColumns.indexOf(column);
+    if (index !== -1) {
+      this.displayedColumns.splice(index, 1);
+      this.hiddenColumns.push(column);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -478,12 +548,113 @@ export class TabCompComponent implements AfterViewInit {
 
 
 
+  exportToExcel__() {
+    // Implementar la exportación a Excel aquí
+    let rowsToExport: any[] = [];
 
+    // Verificar si hay elementos seleccionados
+    if (this.selection.selected.length > 0) {
+      // Si se han seleccionado elementos, exportar solo esos elementos
+      rowsToExport = this.selection.selected;
+    } else {
+      // Si no hay elementos seleccionados, exportar toda la tabla
+      rowsToExport = this.dataSource.data;
+    }
 
+    // Filtrar las columnas visibles para la exportación
+    const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
+
+    // Obtener solo los nombres de las columnas visibles
+    const headers = visibleColumns.map(column => column);
+
+    // Crear una matriz para almacenar los datos de las filas seleccionadas
+    const data: any[][] = [];
+    data.push(headers);
+
+    // Agregar datos de las filas seleccionadas
+    rowsToExport.forEach(row => {
+      const rowData = visibleColumns.map(column => row[column]);
+      data.push(rowData);
+    });
+
+    // Crear un libro de Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Agregar la hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Guardar el libro como archivo Excel
+    XLSX.writeFile(workbook, 'table_data.xlsx');
+  }
 
   exportAllToExcel() {
     // Implementar la exportación de todos los datos a Excel aquí
+    // Implementar la exportación a Excel aquí
+    let rowsToExport: any[] = [];
+    const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
+    // Obtener solo los nombres de las columnas visibles
+    const headers = visibleColumns.map(column => column);
+
+    // Crear una matriz para almacenar los datos de las filas seleccionadas
+    const data: any[][] = [];
+    data.push(headers);
+
+    // Agregar datos de las filas seleccionadas
+    rowsToExport.forEach(row => {
+      const rowData = visibleColumns.map(column => row[column]);
+      data.push(rowData);
+    });
+
+    // Crear un libro de Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Agregar la hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Guardar el libro como archivo Excel
+    XLSX.writeFile(workbook, 'table_data.xlsx');
   }
+
+  excelExport() {
+    let rowsToExport: any[] = [];
+    if (this.selection.selected.length > 0) {
+      // Si se han seleccionado elementos, exportar solo esos elementos
+      rowsToExport = this.selection.selected;
+    } else {
+      // Si no hay elementos seleccionados, exportar toda la tabla
+      rowsToExport = this.dataSource.data;
+    }
+    // Filtrar las columnas visibles para la exportación
+
+    const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
+
+    // Obtener solo los nombres de las columnas visibles
+    const headers = visibleColumns.map(column => column);
+    // Crear una matriz para almacenar los datos de las filas seleccionadas
+    const data: any[][] = [];
+    data.push(headers);
+    // Agregar datos de las filas seleccionadas
+    rowsToExport.forEach(row => {
+      const rowData = visibleColumns.map(column => row[column]);
+      data.push(rowData);
+    });
+    // Crear un libro de Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Agregar la hoja al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Guardar el libro como archivo Excel
+    XLSX.writeFile(workbook, 'table_data.xlsx');
+
+
+  }
+
+
+
 
   getSelectedRowData() {
     // Implementar la lógica para obtener los datos de la fila seleccionada
@@ -497,6 +668,21 @@ export class TabCompComponent implements AfterViewInit {
   sizeToFit() {
     // Implementar la lógica para ajustar el tamaño de las columnas
   }
+
+  drop(event: CdkDragDrop<string[]>) {
+    const previousIndex = this.displayedColumns.findIndex(col => col === event.item.data);
+    const newIndex = event.currentIndex;
+    const columnToMove = this.displayedColumns[previousIndex];
+
+    // Mover la columna en el arreglo
+    this.displayedColumns.splice(previousIndex, 1);
+    this.displayedColumns.splice(newIndex, 0, columnToMove);
+  }
+
+
+
+
+
 }
 
 
