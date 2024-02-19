@@ -46,14 +46,14 @@ import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community'
 
 
 @Component({
-  selector: 'tabla-nativa',
+  selector: 'tabla-custom',
   templateUrl: './tab-comp.component.html',
   styleUrl: './tab-comp.component.css'
 })
 export class TabCompComponent implements AfterViewInit {
 
   @Input() jsonLink: string = '';
-  @Input() tabla: string = '';
+  @Input() tipoTabla: string = '';
 
 
   displayedColumns: string[] = [];
