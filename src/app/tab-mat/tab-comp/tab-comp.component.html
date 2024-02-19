@@ -1,5 +1,5 @@
 <!-- Tabla nativa -->
-<div fxLayout="column" *ngIf="tipoTabla === 'nativa'">
+<div fxLayout="column" *ngIf="tipoTabla === 'tab_nativa'">
   <div>
     <mat-card style="margin: 2%">
       <mat-card-content>
@@ -7,7 +7,7 @@
         <div fxLayout="row" fxLayoutGap="10px">
 
           <button fxFlex matTooltip="Exporta las filas seleccionadas, si no hay selección, se exporta toda la tabla."
-            [matTooltipShowDelay]="'1500'" style="margin-right: 1%; " mat-raised-button color="primary"
+            [matTooltipShowDelay]="'1500'" mat-raised-button color="primary"
             (click)="excelExport()">
             <mat-icon fontIcon="file_download"></mat-icon>
             <span>
@@ -15,26 +15,19 @@
             </span>
           </button>
           <button fxFlex matTooltip="Vuelve a cargar la tabla, anulando los cambios realizados a la vista."
-            [matTooltipShowDelay]="'1500'" style="margin-right: 1%;" mat-raised-button color="primary"
+            [matTooltipShowDelay]="'1500'" mat-raised-button color="primary"
             (click)="loadTableDataSelector();">
             <mat-icon fontIcon="refresh"></mat-icon>
             <span>Refrescar</span>
           </button>
           <button fxFlex matTooltip="Invierte la selección de filas en la tabla." [matTooltipShowDelay]="'1500'"
-            style="margin-right: 1%;" mat-raised-button color="primary" (click)="selectAllUnselectedRows();">
+            mat-raised-button color="primary" (click)="selectAllUnselectedRows();">
             <mat-icon fontIcon="compare_arrows"></mat-icon>
             <span>Seleccion Inversa</span>
           </button>
 
-          <button fxFlex style="margin-right: 1%;" mat-raised-button color="warn" (click)="getSelectedRowData()">
-            <span>Log selection</span>
-          </button>
-
-          <button fxFlex style="margin-right: 1%;" mat-raised-button color="warn" (click)="testLog()">
-            <span>test log</span>
-          </button>
-
-          <button fxFlex mat-raised-button [matMenuTriggerFor]="columnas"> <!-- boton a pulsar -->
+          <button fxFlex matTooltip="Para hacer visible una columna, haga click en el nombre de la columna oculta."
+            [matTooltipShowDelay]="'1500'" mat-raised-button [matMenuTriggerFor]="columnas"> <!-- boton a pulsar -->
             <mat-icon fontIcon="visibility"></mat-icon>
             <span> Mostrar Columnas </span>
           </button>
@@ -45,12 +38,13 @@
             </button>
           </mat-menu>
 
-          <button fxFlex mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
+          <button fxFlex matTooltip="Para ocultar una ocultar o mostrar una columna, haga click en ella."
+            [matTooltipShowDelay]="'1500'" mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
             <mat-icon fontIcon="visibility_off"></mat-icon>
             <span> Ocultar </span>
           </button>
 
-          <mat-menu #columnasVer="matMenu">
+          <mat-menu #columnasVer="matMenu"> <!-- menu a activar -->
             <ng-container *ngFor="let column of allColumns">
               <button mat-menu-item (click)="$event.stopPropagation()">
                 <mat-checkbox (click)="toggleColumnVisibility(column); $event.stopPropagation()">
@@ -59,6 +53,16 @@
               </button>
             </ng-container>
           </mat-menu>
+
+          <!--button fxFlex style="margin-right: 1%;" mat-raised-button color="warn" (click)="getSelectedRowData()">
+            <span>Log selection</span>
+          </button>
+
+          <button fxFlex style="margin-right: 1%;" mat-raised-button color="warn" (click)="testLog()">
+            <span>test log</span>
+          </button-->
+
+
         </div>
 
         <div fxLayout="column"
@@ -73,12 +77,10 @@
 
               <mat-header-cell cdkDrag sticky *matHeaderCellDef [cdkDragData]="col" mat-sort-header
                 arrowPosition="before"
-                style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; ">
-                <!-- ancho de columnas -->
+                style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; width: 15em;"> <!-- column width: width: 15em; -->
 
                 <span> {{col}} </span>
 
-                <!-- menu button -->
                 <button mat-icon-button [matMenuTriggerFor]="options" style="margin-left: 4px;"
                   (click)="stopPropagation($event)">
                   <mat-icon>tune</mat-icon>
@@ -123,7 +125,7 @@
 
 <!------------------------------------------------------------------------------ AG GRID SECTION ----------------------------------------------------------------------------------->
 
-<div fxLayout="column" *ngIf="tipoTabla === 'aggrid'"> <!--Principal AG GRID -->
+<div fxLayout="column" *ngIf="tipoTabla === 'tab_agGrid'"> <!-- ocultar si tipoTabla es "nativa" -->
   <div>
     <mat-card style="margin-top: 1% !important; margin-bottom: 1% !important; margin:4%">
       <mat-card-content>
@@ -146,17 +148,19 @@
             <mat-icon fontIcon="refresh"></mat-icon> Refrescar
           </button>
 
-          <button style="margin-right: 1%;" mat-raised-button color="warn"
-            (click)="getSelectedRowData_Ag()">test_Log</button>
+          <!--button style="margin-right: 1%;" mat-raised-button color="warn"
+            (click)="getSelectedRowData_Ag()">test_Log</button-->
         </div>
 
         <div fxLayout="column" style="margin-top: 1% ; margin-bottom: 1% ;  ">
+
           <ag-grid-angular style="width: 100%; height:75vh;" class="ag-theme-material" [rowData]="rowData"
             [columnDefs]="columnDefs" [pagination]="true" [paginationPageSize]="paginationPageSize"
             [paginationPageSizeSelector]="paginationPageSizeSelector" [rowSelection]="'multiple'"
             [suppressDragLeaveHidesColumns]="false" [localeText]="ag_Grid_Locale_es"
             (gridReady)="onGridReady_Ag($event)">
           </ag-grid-angular>
+
           Items Seleccionados: {{selectedRowCount}}
         </div>
       </mat-card-content>
