@@ -1,3 +1,171 @@
+<div class="parentContainer" >
+  <div class="bigBox">
+        <div class="botones">
+
+          <button matTooltip="Exporta las filas seleccionadas, si no hay selección, se exporta toda la tabla."
+            [matTooltipShowDelay]="'1500'" mat-raised-button color="primary" (click)="excelExport()">
+            <mat-icon fontIcon="file_download"></mat-icon>
+            <span>
+              Exportar
+            </span>
+          </button>
+          <button matTooltip="Vuelve a cargar la tabla, anulando los cambios realizados a la vista."
+            [matTooltipShowDelay]="'1500'" mat-raised-button color="primary" (click)="loadTableDataSelector();">
+            <mat-icon fontIcon="refresh"></mat-icon>
+            <span>Refrescar</span>
+          </button>
+          <button matTooltip="Invierte la selección de filas en la tabla." [matTooltipShowDelay]="'1500'"
+            mat-raised-button color="primary" (click)="selectAllUnselectedRows();">
+            <mat-icon fontIcon="compare_arrows"></mat-icon>
+            <span>Seleccion Inversa</span>
+          </button>
+
+          <button matTooltip="Para hacer visible una columna, haga click en el nombre de la columna oculta."
+            [matTooltipShowDelay]="'1500'" mat-raised-button [matMenuTriggerFor]="columnas"> <!-- boton a pulsar -->
+            <mat-icon fontIcon="visibility"></mat-icon>
+            <span> Mostrar Columnas </span>
+          </button>
+
+          <mat-menu #columnas="matMenu"> <!-- menu a activar -->
+            <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
+              <span> {{ column }} </span>
+            </button>
+          </mat-menu>
+
+          <button matTooltip="Para ocultar una ocultar o mostrar una columna, haga click en ella."
+            [matTooltipShowDelay]="'1500'" mat-raised-button [matMenuTriggerFor]="columnasVer"> <!-- boton a pulsar -->
+            <mat-icon fontIcon="visibility_off"></mat-icon>
+            <span> Ocultar </span>
+          </button>
+
+          <mat-menu #columnasVer="matMenu"> <!-- menu a activar -->
+            <ng-container *ngFor="let column of allColumns">
+              <button mat-menu-item (click)="$event.stopPropagation()">
+                <mat-checkbox (click)="toggleColumnVisibility(column); $event.stopPropagation()">
+                  {{ column }}
+                </mat-checkbox>
+              </button>
+            </ng-container>
+          </mat-menu>
+
+
+        </div>
+
+        <div class="tablaDiv">
+
+          <table mat-table [dataSource]="dataSource" matSort 
+            (matSortChange)="sortChange($event)" cdkDropList cdkDropListOrientation="horizontal"
+            (cdkDropListDropped)="drop($event)"> <!-- Tabla -->
+
+            <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+
+
+              <mat-header-cell cdkDrag sticky *matHeaderCellDef [cdkDragData]="col" mat-sort-header
+                arrowPosition="before"
+                style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; width: 15em;">
+                <!-- column width: width: 15em; -->
+
+                <span> {{col}} </span>
+
+                <button mat-icon-button [matMenuTriggerFor]="options" style="margin-left: 4px;"
+                  (click)="stopPropagation($event)">
+                  <mat-icon>tune</mat-icon>
+                </button>
+
+              </mat-header-cell>
+
+              <mat-menu #options="matMenu" yPosition="above"> <!--menu options-->
+                <button mat-menu-item>
+                  <div >
+                    <mat-form-field (click)="stopPropagation($event)">
+                      <mat-label>Buscar</mat-label>
+                      <input matInput (input)="applyFilter($event, col)" placeholder="" [value]="">
+                    </mat-form-field>                    
+                  </div>
+                </button>
+                <button mat-menu-item (click)="toggleColumnVisibility(col)">
+                  <mat-icon>visibility_off</mat-icon>
+                  <span>Ocultar Columna</span>
+                </button>
+              </mat-menu>
+
+              <mat-cell *matCellDef="let element" style="border-right: 1px solid lightgrey;">
+                
+                
+                  <!--------------------------------------------------------- carga de celdas por tipo de dato ------------------------------------------------------>
+
+                <ng-container *ngIf="cellType(col) === 'string'">
+                  {{element[col]}}
+                </ng-container>
+
+                <ng-container *ngIf="cellType(col) === 'checkbox'">
+                  <ng-container *ngIf="element[col] !== ''">
+                    <mat-checkbox [disabled]="true" [checked]="element[col]"></mat-checkbox>
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    <!-- no es true o false; -> casilla vacia-->
+                  </ng-container>
+                  
+                </ng-container>
+
+                
+
+                <ng-container *ngIf="cellType(col) === 'img'">
+                  <ng-container *ngIf="element[col] !== ''">
+                    <img [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 8vw;">
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    
+                  </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="cellType(col) === 'url'">
+                  <ng-container *ngIf="element[col] !== ''">
+                    <!-- si tiene url-->  
+                    <a href="{{element[col]}}">{{element[col]}}</a>
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    <!-- no tiene url-->
+                  </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="cellType(col) === 'number'">
+                  {{element[col]}}
+                </ng-container>
+                <ng-container *ngIf="cellType(col) === 'date'">
+                  {{element[col]}}
+                </ng-container>
+                <ng-container *ngIf="cellType(col) === 'number_miles'">
+                  {{element[col] | number:'1.0'}} <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
+                </ng-container>
+                
+                <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json -->
+                  <span style="background-color:rgba(202, 202, 202, 0.25); font-weight: bolder;">
+                    SIN TIPO: {{element[col]}} 
+                  </span>
+                  
+                </ng-container>
+              
+              </mat-cell>
+
+
+            </ng-container>
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+            <mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
+              [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"></mat-row>
+          </table>
+
+        </div>
+        <div> &nbsp; Items Seleccionados: {{selectedRowCount}}</div>
+        <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons></mat-paginator>
+
+      
+  </div>
+</div>
+
+ <!-- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
 <!-- Tabla nativa -->
 <div fxLayout="column" *ngIf="tipoTabla === 'tab_nativa'">
   <div>
@@ -125,11 +293,15 @@
               <mat-menu #options="matMenu" yPosition="above"> <!--menu options-->
                 <button mat-menu-item>
                   <div fxLayout="column" fxLayoutGap="10px">
-                    <mat-form-field fxFlex (click)="stopPropagation($event)">
+                    <!--mat-form-field fxFlex (click)="stopPropagation($event)">
                       <mat-label>Buscar</mat-label>
                       <input matInput style="margin-bottom: -3vh;" (keyup)="applyFilter($event, col)" placeholder=""
                         #inputSearch>
-                    </mat-form-field>
+                    </mat-form-field-->
+                    <mat-form-field fxFlex (click)="stopPropagation($event)">
+                      <mat-label>Buscar</mat-label>
+                      <input matInput (input)="applyFilter($event, col)" placeholder="" [value]="">
+                    </mat-form-field>                    
                   </div>
                 </button>
                 <button mat-menu-item (click)="toggleColumnVisibility(col)">
@@ -139,18 +311,62 @@
               </mat-menu>
 
               <mat-cell *matCellDef="let element" style="border-right: 1px solid lightgrey;">
-                <ng-container *ngIf="cellType(col) === 'img'">
-                  <img [src]="element[col]" alt="imagen" width="70px" height="100px">
-                </ng-container>
+                
+                <!--ng-container *ngIf="cellType(col) === 'img'">
+                  <img [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 5vw;">
+                </ng-container-->
+
+
+                <!--ng-container *ngIf="cellType(col) === 'img'">
+                  <ng-container *ngIf="element[col] !=== ''">
+                    <img   [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 10vw;">
+                  </ng-container>
+                  <ng-container *ngIf="element[col] ==== ''">
+                    <p>Sin imagen</p>
+
+                  </ng-container>
+
+
+                  
+                </ng-container-->
+
+                  <!--------------------------------------------------------- carga de celdas por tipo de dato ------------------------------------------------------>
+
                 <ng-container *ngIf="cellType(col) === 'string'">
                   {{element[col]}}
                 </ng-container>
+
                 <ng-container *ngIf="cellType(col) === 'checkbox'">
-                  <mat-checkbox [disabled]="true" [checked]="element[col]"></mat-checkbox>
+                  <ng-container *ngIf="element[col] !== ''">
+                    <mat-checkbox [disabled]="true" [checked]="element[col]"></mat-checkbox>
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    <!-- no es true o false; -> casilla vacia-->
+                  </ng-container>
+                  
                 </ng-container>
-                <ng-container *ngIf="cellType(col) === ''">
-                  SIN TIPO: {{element[col]}} 
+
+                
+
+                <ng-container *ngIf="cellType(col) === 'img'">
+                  <ng-container *ngIf="element[col] !== ''">
+                    <img [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 8vw;">
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    
+                  </ng-container>
                 </ng-container>
+
+                <ng-container *ngIf="cellType(col) === 'url'">
+                  <ng-container *ngIf="element[col] !== ''">
+                    <!-- si tiene url-->  
+                    <a href="{{element[col]}}">{{element[col]}}</a>
+                  </ng-container>
+                  <ng-container *ngIf="element[col] === ''">
+                    <!-- no tiene url-->
+                  </ng-container>
+                </ng-container>
+
                 <ng-container *ngIf="cellType(col) === 'number'">
                   {{element[col]}}
                 </ng-container>
@@ -160,6 +376,14 @@
                 <ng-container *ngIf="cellType(col) === 'number_miles'">
                   {{element[col] | number:'1.0'}} <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
                 </ng-container>
+                
+                <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json -->
+                  <span style="background-color:rgba(202, 202, 202, 0.25); font-weight: bolder;">
+                    SIN TIPO: {{element[col]}} 
+                  </span>
+                  
+                </ng-container>
+              
               </mat-cell>
 
 

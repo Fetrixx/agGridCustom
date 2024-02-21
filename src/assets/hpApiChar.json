@@ -8,7 +8,7 @@
             "gender": "string",
             "house": "string",
             "dateOfBirth": "date",
-            "yearOfBirth": "number",
+            "yearOfBirth": "number_miles",
             "wizard": "check",
             "ancestry": "string",
             "eyeColour": "string",

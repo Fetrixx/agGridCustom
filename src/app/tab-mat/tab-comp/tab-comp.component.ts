@@ -63,6 +63,9 @@ export class TabCompComponent {
   ngAfterViewInit() {
     this.loadTableDataSelector();
     this.loadConfigData();
+    this.applyAllFilters(); // Aplicar filtros iniciales
+    
+    
   }
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -163,18 +166,24 @@ export class TabCompComponent {
           const type = col[key];
           if (type === 'img') {
             return 'img';
-          } else if (type === 'check') {
+          }
+          else if (type === 'check') {
             return 'checkbox';
-          } else if (type === 'string') {
+          } 
+          else if (type === 'string') {
             return 'string';
           }
           else if (type === 'number') {
             return 'number';
-          } else if (type === 'date') {
+          }
+          else if (type === 'date') {
             return 'date';
           }
           else if (type === 'number_miles') {
             return 'number_miles';
+          }
+          else if (type === 'url') {
+            return 'url';
           }
 
         }
@@ -328,7 +337,11 @@ export class TabCompComponent {
     event.stopPropagation();
   }
 
-  applyFilter(event: Event, columnName: string) {
+  filters: { [key: string]: string } = {};
+
+  /*applyFilter(event: Event, columnName: string) {
+    //const colName = columnName.replace(/ /g, '').toLowerCase(); // Elimina espacios y convierte a minúsculas
+    //console.log(colName)
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filterPredicate = (data: any, filter: string) => {
       const dataStr = data[columnName].toLowerCase();
@@ -338,7 +351,25 @@ export class TabCompComponent {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }*/
+  applyFilter(event: Event, columnName: string) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.filters[columnName] = filterValue;
+    this.applyAllFilters();
   }
+  
+  applyAllFilters() {
+    this.dataSource.filterPredicate = (data: any) => {
+      for (const key in this.filters) {
+        if (this.filters[key] && data[key].toString().toLowerCase().indexOf(this.filters[key]) === -1) {
+          return false; // No se cumple uno de los filtros, no mostrar esta fila
+        }
+      }
+      return true; // Se cumplen todos los filtros, mostrar esta fila
+    };
+    this.dataSource.filter = JSON.stringify(this.filters);
+  }
+  
 
 
   hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas

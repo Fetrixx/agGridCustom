@@ -22,3 +22,58 @@
     
 }
 
+
+
+.parentContainer{
+    display: flex;
+    border: 3px solid black;
+    /*background: yellow; */
+    padding: 20px; 
+    flex-direction: column;
+}
+
+.bigBox{
+    display: flex;
+    border: 3px solid black;
+    /*background: cyan; */
+    padding: 20px; 
+    flex-direction: column;
+}
+
+
+.botones{
+    display: flex;
+    border: 3px solid black;
+    /*background: cyan; */
+    padding: 20px; 
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 1vw;
+
+}
+
+
+.tablaDiv{
+    border: 3px solid black;
+    
+    overflow: auto; 
+    width: auto;
+    height: 70vh;
+    flex: 0, 0, 70%;
+    user-select: none;
+}
+
+
+/*
+.tab{
+    flex: 0, 0, 70%;
+    user-select: none;
+    overflow: auto;
+    width: auto;
+}*/
+
+.mat-table{
+    flex: 1;
+    overflow: auto;
+}
