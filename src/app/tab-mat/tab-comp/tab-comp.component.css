@@ -25,45 +25,75 @@
 
 
 .parentContainer{
-    display: flex;
+    /*display: flex;
     border: 3px solid black;
-    /*background: yellow; */
+    background: yellow; 
     padding: 20px; 
     flex-direction: column;
+    */
+
+    display: flex;
+    justify-content: center; /* Aligns child elements horizontally */
+    align-items: center; /* Aligns child elements vertically */
+    border: 3px solid black;
+    flex-direction: column; /* Arranges child elements vertically */
 }
 
 .bigBox{
-    display: flex;
+    /*display: flex;
     border: 3px solid black;
-    /*background: cyan; */
+    background: cyan; 
     padding: 20px; 
-    flex-direction: column;
+    flex-direction: column;*/
+    display: flex;
+    flex-direction: column; /* Arranges child elements vertically */
+    
+    width: 95vw; /* Adjust the width 95 viewport Width */
+    margin: 0 auto; /* Centers the box horizontally */
+    border: 3px solid black;
 }
 
 
 .botones{
-    display: flex;
+    /*display: flex;
     border: 3px solid black;
-    /*background: cyan; */
+    background: cyan; 
     padding: 20px; 
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: left;
     gap: 1vw;
-
+    */
+    display: flex;
+    justify-content: flex-start; /* Align buttons to the left */
+    justify-content: left;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1vw;
+    border: 3px solid black;
+    margin: 1vw; /* Adds space between buttons and the table */
 }
 
 
 .tablaDiv{
     border: 3px solid black;
-    
+    /*
     overflow: auto; 
     width: auto;
     height: 70vh;
     flex: 0, 0, 70%;
+    user-select: none;*/
+    width: 100%; /* Ensures the table takes full width */
+    overflow-x: auto; /* Enables horizontal scrolling if table overflows */
+    overflow-y: auto; /* Enable vertical scrolling */
+    height: 80vh; /* Set a fixed height for the table container */
     user-select: none;
+
 }
 
+.tableHeader{
+    background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; width: 15em;
+}
 
 /*
 .tab{
@@ -73,7 +103,9 @@
     width: auto;
 }*/
 
+
+/*
 .mat-table{
     flex: 1;
     overflow: auto;
-}
+}*/

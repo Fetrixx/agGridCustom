@@ -1,4 +1,17 @@
+/*
+ya esta:
+* busqueda por columna multiple
+* flexbox
+* conversion de datos para mostrar
+* archivo de config en el json
 
+
+falta: 
+- multi sort
+- pivot
+- formatear "date" para mostrar y filtrar correctamente
+
+*/
 import { Component, ViewChild, AfterViewInit, HostListener, Input } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
@@ -63,9 +76,14 @@ export class TabCompComponent {
   ngAfterViewInit() {
     this.loadTableDataSelector();
     this.loadConfigData();
-    this.applyAllFilters(); // Aplicar filtros iniciales
-    
-    
+    //this.applyAllFilters(); // Aplicar filtros iniciales
+
+    if (this.sort) {
+      this.sort.sortChange.subscribe(() => {
+        this.adjustSelectionAfterSort();
+      });
+    }
+
   }
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -169,7 +187,7 @@ export class TabCompComponent {
           }
           else if (type === 'check') {
             return 'checkbox';
-          } 
+          }
           else if (type === 'string') {
             return 'string';
           }
@@ -210,7 +228,19 @@ export class TabCompComponent {
     }*/
   }
 
-
+  refresh() {
+    // Limpiar los filtros
+    this.filters = {};
+    // Establecer el filtro de la tabla a un valor vacío
+    this.dataSource.filter = '';
+    // Reiniciar el ordenamiento de la tabla
+    if (this.sort) {
+      this.sort.active = '';
+      this.sort.direction = '';
+    }
+    // Cargar los datos actualizados en la tabla
+    this.loadTableDataSelector();
+  }
 
   loadTableDataSelector() {
     this.http.get<{ data: any[] }>(this.jsonLink) // get "data" de type any[] dentro del json
@@ -357,7 +387,7 @@ export class TabCompComponent {
     this.filters[columnName] = filterValue;
     this.applyAllFilters();
   }
-  
+
   applyAllFilters() {
     this.dataSource.filterPredicate = (data: any) => {
       for (const key in this.filters) {
@@ -369,7 +399,7 @@ export class TabCompComponent {
     };
     this.dataSource.filter = JSON.stringify(this.filters);
   }
-  
+
 
 
   hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas
