@@ -17,13 +17,14 @@ import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community'
 })
 
 //implements AfterViewInit
-export class TabCompComponent  {
+export class TabCompComponent {
 
   @Input() jsonLink: string = '';
   @Input() tipoTabla: string = '';
 
 
   displayedColumns: string[] = [];
+  originalColumns: string[] = [];
   allColumns: string[] = [];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>();
   selectedRowIndex = -1; // Inicialmente ninguna fila seleccionada
@@ -61,6 +62,7 @@ export class TabCompComponent  {
 
   ngAfterViewInit() {
     this.loadTableDataSelector();
+    this.loadConfigData();
   }
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -116,10 +118,95 @@ export class TabCompComponent  {
     return formattedName;
   }
 
-  loadTableDataSelector() {
-    this.http.get<any[]>(this.jsonLink)
+
+  configColumnas: any[] = [];
+  loadConfigData() {
+    this.http.get<{ config: any[] }>(this.jsonLink) // get "config" de type any[] dentro del json
       .subscribe(data => {
-        if (data.length > 0) {
+        if (data && data.config && data.config.length > 0) {
+          const configData = data.config;
+          this.configColumnas = configData;
+          //console.log(this.configColumnas[0].id);
+          //console.log(this.configColumnas[0].wand);
+          //console.log(this.configColumnas[0]['wand']);
+          for (let i = 0; i < this.originalColumns.length; i++) { // si funca para leer 
+            //console.log(this.configColumnas[0]['wand']);
+            //console.log(this.configColumnas[0][this.originalColumns[i]]); // SI LEE
+          }
+
+          for (const columna of this.originalColumns) {
+            //console.log(this.configColumnas[0][columna]); // SI LEE, da el dato de string, number, date, etc
+
+
+          }
+
+        }
+      });
+  }
+
+  cellType(colId: string) {
+    // col id es el nombre de la columna del item actual
+    //console.log(this.originalColumns)
+    //colId = colId.replace(/\s+/g, '').toLowerCase();
+    const normalizedColId = colId.replace(/ /g, '').toLowerCase(); // Elimina espacios y convierte a minúsculas
+
+    //colId = colId.toLowerCase();
+    //colId.replace(/\s+/g , '');
+    //console.log(colId);
+    for (const col of this.configColumnas) {
+      for (const key in col) {
+        // Normaliza el nombre de la columna en el objeto de configuración
+        const normalizedKey = key.replace(/ /g, '').toLowerCase();
+
+        // Compara los nombres normalizados
+        if (normalizedKey === normalizedColId) {
+          const type = col[key];
+          if (type === 'img') {
+            return 'img';
+          } else if (type === 'check') {
+            return 'checkbox';
+          } else if (type === 'string') {
+            return 'string';
+          }
+          else if (type === 'number') {
+            return 'number';
+          } else if (type === 'date') {
+            return 'date';
+          }
+          else if (type === 'number_miles') {
+            return 'number_miles';
+          }
+
+        }
+      }
+    }
+    return ''
+  }
+
+  testog() {
+    console.log(this.originalColumns)
+    console.log(this.configColumnas)
+  }
+
+  loadAttributes() {
+    // Iterar sobre los elementos del array utilizando los valores de allColumns como índices
+    for (let i = 0; i < this.originalColumns.length; i++) {
+      console.log(typeof (this.originalColumns[i]))
+      console.log(this.configColumnas[0]['wand']);
+    }
+    //console.log(this.originalColumns)
+    /*
+    for (const columna of this.originalColumns) {
+      console.log(columna);
+    }*/
+  }
+
+
+
+  loadTableDataSelector() {
+    this.http.get<{ data: any[] }>(this.jsonLink) // get "data" de type any[] dentro del json
+      .subscribe(data => { // acceder a .data del item "data" del json
+        if (data.data.length > 0) {
           // Función para eliminar caracteres no deseados de objetos anidados
           const removeBrackets = (value: any) => {
             if (typeof value === 'object' && value !== null) {
@@ -132,7 +219,7 @@ export class TabCompComponent  {
           };
 
           // Mapear los objetos para convertir los objetos anidados a strings
-          const modifiedData = data.map(item => {
+          const modifiedData = data.data.map(item => {                    // acceder a .data del item "data" del json
             const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
               modifiedItem[this.formatColumnName(key)] = removeBrackets(item[key]);
@@ -140,6 +227,15 @@ export class TabCompComponent  {
             return modifiedItem;
           });
 
+          const colsOriginales = data.data.map(item => {
+            const originalItems: { [key: string]: any } = {}; // Declaración de tipo
+            for (const key in item) {
+              originalItems[key] = item[key];
+            }
+            return originalItems;
+          })
+
+          this.originalColumns = Object.keys(colsOriginales[0]);
           this.displayedColumns = Object.keys(modifiedData[0]);
           this.allColumns = Object.keys(modifiedData[0]);
           this.dataSource.data = modifiedData;
@@ -366,10 +462,11 @@ export class TabCompComponent  {
 
   loadGridData_Ag() {
     // json for test: https://hp-api.onrender.com/
-    this.http.get<any[]>(this.jsonLink) // json file here
+
+    this.http.get<{ data: any[] }>(this.jsonLink) // json file here
       .subscribe(data => {
-        this.columnDefs = this.generateColumnDefs_Ag(data);
-        this.rowData = data;
+        this.columnDefs = this.generateColumnDefs_Ag(data.data);
+        this.rowData = data.data;
       });
   }
 
