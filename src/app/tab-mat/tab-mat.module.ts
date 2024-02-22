@@ -41,12 +41,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AgGridAngular } from 'ag-grid-angular';
 import { AgGridModule } from 'ag-grid-angular';
 
-
-
+import { DatesCustomPipe } from '../pipes/dates-custom.pipe';
+//import { NumberCustomPipe } from '../pipes/number-custom.pipe';
 
 @NgModule({
   declarations: [
-    TabCompComponent
+    TabCompComponent,
+    DatesCustomPipe,
+    //NumberCustomPipe
+    //CustomDateFormatPipe
   ],
   imports: [
     CommonModule,

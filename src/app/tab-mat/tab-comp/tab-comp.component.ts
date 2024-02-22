@@ -4,15 +4,15 @@ ya esta:
 * flexbox ?
 * conversion de datos para mostrar
 * archivo de config en el json
-
+* formatear "date" para mostrar y filtrar correctamente:
 
 en proceso:
-- formatear "date" para mostrar y filtrar correctamente:
-    se formatea desde el json:"aaaa-mm-dd"  a "dd mm aaaa", para mostrarlo de esa manera sin modificar datos.
+- flex correcto en tabla
 
 falta: 
 - multi sort
 - pivot
+- sticky header
 
 
 */
@@ -91,15 +91,6 @@ export class TabCompComponent {
   }
   
 
-  formatDate(value: string): string {
-    if (!value) return ''; // Handle null or undefined values
-    
-    const parts = value.split('-'); // Assuming the input format is always "YYYY-MM-DD"
-    if (parts.length !== 3) return value; // Return the value as is if it doesn't match the expected format
-
-    const [year, month, day] = parts;
-    return `${day} / ${month} / ${year}`; // Return the formatted date as "DD-MM-YYYY"
-  }
 
   @HostListener('document:keydown.escape', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -197,26 +188,33 @@ export class TabCompComponent {
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
           const type = col[key];
-          if (type === 'img') {
-            return 'img';
+          if (type === 'string') {
+            return 'string';
           }
           else if (type === 'check') {
             return 'checkbox';
           }
-          else if (type === 'string') {
-            return 'string';
-          }
+          
           else if (type === 'number') {
             return 'number';
-          }
-          else if (type === 'date') {
-            return 'date';
           }
           else if (type === 'number_miles') {
             return 'number_miles';
           }
+          else if (type === 'date') {
+            return 'date';
+          }
+          else if (type === 'datetime') {
+            return 'datetime';
+          }
+          else if (type === 'time') {
+            return 'time';
+          }
           else if (type === 'url') {
             return 'url';
+          }
+          else if (type === 'img') {
+            return 'img';
           }
 
         }

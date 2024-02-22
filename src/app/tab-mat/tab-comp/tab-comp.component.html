@@ -1,5 +1,22 @@
 
+<!--
+<p>
+  fecha 1: date
+  {{"2024-02-14T00:00:00-03:00" | datesCustom: "date"}}
+</p>
 
+
+
+<p>
+  fecha 2: datetime
+  {{"2024-02-22T11:37:06.8708246-03:00" | datesCustom: "datetime"}}
+</p>
+
+<p>
+  fecha 3: time
+  {{"2024-02-22T11:37:06.8708246-03:00" | datesCustom: "time"}}
+</p>
+-->
 
 <!-- Tabla nativa -->
 <div class="parentContainer" *ngIf="tipoTabla === 'tab_nativa'">
@@ -62,8 +79,8 @@
         <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col" >
 
 
-          <mat-header-cell cdkDrag sticky *matHeaderCellDef [cdkDragData]="col" mat-sort-header arrowPosition="before"
-            style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey;  width: 15em">
+          <mat-header-cell  cdkDrag sticky *matHeaderCellDef [cdkDragData]="col" mat-sort-header arrowPosition="before"
+            style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey;  ">
             <!-- style=" background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; width: 15em;" -->
             <!-- column width: width: 15em; -->
 
@@ -91,7 +108,7 @@
             </button>
           </mat-menu>
 
-          <mat-cell *matCellDef="let element" style="border-right: 1px solid lightgrey;">
+          <mat-cell  *matCellDef="let element" style="border-right: 1px solid lightgrey;">
 
 
             <!--------------------------------------------------------- carga de celdas por tipo de dato ------------------------------------------------------>
@@ -112,7 +129,7 @@
 
 
             <ng-container *ngIf="cellType(col) === 'img'">
-              <ng-container *ngIf="element[col] !== ''">
+              <ng-container *ngIf="element[col] !== ''"  >
                 <img [src]="element[col]" alt="imagen" style="width: 100%;  height: auto; max-width: 50px;" >
               </ng-container>
               <ng-container *ngIf="element[col] === ''">
@@ -131,14 +148,22 @@
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'number'">
-              {{element[col]}}
-            </ng-container>
-            <ng-container *ngIf="cellType(col) === 'date'">
-              {{formatDate(element[col])}}
+              {{element[col]}} <!-- por default muestra sus decimales.-->
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'number_miles'">
               {{element[col] | number:'1.0'}} <!-- , en miles + todos sus decimales -->
               <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
+            </ng-container>
+
+            <ng-container *ngIf="cellType(col) === 'date'">
+              <!--{{formatDate(element[col])}}-->
+              {{(element[col]) | datesCustom: "date"}}
+            </ng-container>
+            <ng-container *ngIf="cellType(col) === 'time'">
+              {{(element[col]) | datesCustom: "time"}}
+            </ng-container>
+            <ng-container *ngIf="cellType(col) === 'datetime'">
+              {{(element[col]) | datesCustom: "datetime"}}
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json -->
