@@ -5,14 +5,15 @@ ya esta:
 * conversion de datos para mostrar
 * archivo de config en el json
 * formatear "date" para mostrar y filtrar correctamente:
+* sticky header
 
 en proceso:
-- flex correcto en tabla
+- flex correcto en tabla (ancho de cols)
 
 falta: 
-- multi sort
-- pivot
-- sticky header
+- multi sort (ngx-mat-multi-sort ?)
+- pivot (???)
+
 
 
 */
@@ -89,7 +90,7 @@ export class TabCompComponent {
     }
 
   }
-  
+
 
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -194,7 +195,7 @@ export class TabCompComponent {
           else if (type === 'check') {
             return 'checkbox';
           }
-          
+
           else if (type === 'number') {
             return 'number';
           }
@@ -242,6 +243,7 @@ export class TabCompComponent {
   }
 
   refresh() {
+    this.hiddenColumns = [];
     // Limpiar los filtros
     this.filters = {};
     // Establecer el filtro de la tabla a un valor vacío
@@ -253,6 +255,8 @@ export class TabCompComponent {
     }
     // Cargar los datos actualizados en la tabla
     this.loadTableDataSelector();
+    this.deselectAllRows();
+
   }
 
   loadTableDataSelector() {
@@ -446,6 +450,25 @@ export class TabCompComponent {
     } else if (indexInHidden !== -1) {
       // La columna está actualmente oculta, así que la mostramos
       this.showColumn(column);
+    }
+
+  }
+
+
+  refreshColumnVisibility(column: string) {
+    const indexInDisplayed = this.displayedColumns.indexOf(column);
+    const indexInHidden = this.hiddenColumns.indexOf(column);
+
+    this.hideColumn
+    if (indexInHidden !== -1) {
+      // La columna está actualmente oculta, así que la mostramos
+      this.showColumn(column);
+
+      if (indexInHidden !== -1) {
+        this.displayedColumns.splice(indexInHidden, 1); // Eliminar la columna de las columnas ocultas
+        //this.hiddenColumns.push(column);
+      }
+
     }
 
   }
