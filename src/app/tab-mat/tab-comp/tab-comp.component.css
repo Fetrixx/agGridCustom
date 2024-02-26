@@ -33,74 +33,32 @@
     table-layout: fixed;
 }
 
-
-
-
-
-.parentContainer{
-    /*display: flex;
-    
-    background: yellow; 
-    padding: 20px; 
-    flex-direction: column;
-    */
-
-    display: flex;
-    justify-content: center; /* Aligns child elements horizontally */
-    align-items: center; /* Aligns child elements vertically */
-    
-    flex-direction: column; /* Arranges child elements vertically */
-    width: 100vw;
-
-    display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100vw; 
-    
-}
-
-.bigBox{
-    /*display: flex;
-    
-    background: cyan; 
-    padding: 20px; 
-    flex-direction: column;*/
-    display: flex;
-    flex-direction: column; /* Arranges child elements vertically */
-    
-    width: 95vw; /* Adjust the width 95 viewport Width */
-    margin: 0 auto; /* Centers the box horizontally */
-    display: flex; flex-direction: column; width: 95vw; margin: 0 auto;
-    
-}
-
 /*
-tr:nth-child(even) {background-color: #ececec48;}
-*/
-
 .centeredCell{
     text-align: center;
     justify-content: center;
-}
+}*/
 
 .botones{
-    /*display: flex;
-    
-    background: cyan; 
-    padding: 20px; 
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: left;
-    gap: 1vw;
-    */
     display: flex;
     justify-content: flex-start; /* Align buttons to the left */
     justify-content: left;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 1vw;
-    
+    margin-bottom: 0.5vh;
     align-items: center;
-    margin: auto;
     padding: 0.5%;
     width: 100%;
+    /*display: flex;
+    
+    background: cyan; 
+    padding: 20px; 
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 1vw;
+    */
 }
 
 
@@ -127,6 +85,30 @@ tr:nth-child(even) {background-color: #ececec48;}
     background: rgba(173, 216, 230, 0.459); border-right: 1px solid lightgrey; position: sticky; width: 15em;
 }
 
+
+.footer{
+    border-top: 1px solid lightgrey;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1vw;
+    
+    margin: auto;
+    width: 100%;
+    /*display: flex;
+    
+    background: cyan; 
+    padding: 20px; 
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 1vw;
+    */
+}
+
+
 /*
 .tab{
     flex: 0, 0, 70%;
@@ -142,31 +124,46 @@ tr:nth-child(even) {background-color: #ececec48;}
     overflow: auto;
 }*/
 
-.sticky-header {
+/*.sticky-header {
   position: sticky;
   top: 0;
-  z-index: 1000; /* Adjust the z-index as needed */
+  z-index: 1000; /* Adjust the z-index as needed *
+}*/
+
+
+/*
+.parentContainer{
+    /*display: flex;
+    
+    background: yellow; 
+    padding: 20px; 
+    flex-direction: column; *
+    
+
+    display: flex;
+    justify-content: center; /* Aligns child elements horizontally *
+    align-items: center; /* Aligns child elements vertically *
+    
+    flex-direction: column; /* Arranges child elements vertically *
+    width: 100vw;
+
+    display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100vw; 
+    
 }
-
-
-
-.footer{
+.bigBox{
     /*display: flex;
     
     background: cyan; 
     padding: 20px; 
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: left;
-    gap: 1vw;
-    */
+    flex-direction: column;*
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1vw;
+    flex-direction: column; /* Arranges child elements vertically *
     
-    margin: auto;
-    width: 100%;
-}
+    width: 95vw; /* Adjust the width 95 viewport Width *
+    margin: 0 auto; /* Centers the box horizontally *
+    display: flex; flex-direction: column; width: 95vw; margin: 0 auto;
+}*/
+
+/*
+tr:nth-child(even) {background-color: #ececec48;}
+*/

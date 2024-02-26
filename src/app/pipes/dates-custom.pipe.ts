@@ -13,7 +13,7 @@ export class DatesCustomPipe implements PipeTransform {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-
+    
     if (value !== null){
       switch (format){
         case 'date': 

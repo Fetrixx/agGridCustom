@@ -1,18 +1,22 @@
 /*
 ya esta:
 * busqueda por columna multiple
-* flexbox ?
+* flexbox
 * conversion de datos para mostrar
 * archivo de config en el json
 * formatear "date" para mostrar y filtrar correctamente:
 * sticky header
 
 en proceso:
-- flex correcto en tabla (ancho de cols)
+- flex correcto en tabla (ancho de cols) ?
+formato para json config
+"config""id": {"typeValue": "date", "pipe": "short", "columName": "#", "total": true},
+-chips para busqueda por columna 
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
-- pivot (???)
+- pivot (?)
+
 
 
 
@@ -232,8 +236,8 @@ export class TabCompComponent {
   loadAttributes() {
     // Iterar sobre los elementos del array utilizando los valores de allColumns como índices
     for (let i = 0; i < this.originalColumns.length; i++) {
-      console.log(typeof (this.originalColumns[i]))
-      console.log(this.configColumnas[0]['wand']);
+      //console.log(typeof (this.originalColumns[i]))
+      //console.log(this.configColumnas[0]['wand']);
     }
     //console.log(this.originalColumns)
     /*
@@ -405,17 +409,81 @@ export class TabCompComponent {
     this.applyAllFilters();
   }
 
+  busqueda: string = "";
+
   applyAllFilters() {
     this.dataSource.filterPredicate = (data: any) => {
       for (const key in this.filters) {
-        if (this.filters[key] && data[key].toString().toLowerCase().indexOf(this.filters[key]) === -1) {
-          return false; // No se cumple uno de los filtros, no mostrar esta fila
+        console.log(this.filters[key])
+        if (this.filters[key] !== null && this.filters[key] !== "") { // Solo aplicar filtro si no es null ni una cadena vacía
+          if (data[key] === null) {
+            return false; // Omitir si hay un dato null
+          } else {
+            if (this.filters[key] && data[key].toString().toLowerCase().indexOf(this.filters[key]) === -1) {
+              return false; // No se cumple uno de los filtros, no mostrar esta fila
+            }
+          }
+        }
+      }
+      return true; // Se cumplen todos los filtros, mostrar esta fila
+    };
+
+    // Limpiar el objeto this.filters eliminando propiedades vacías o nulas
+    for (const key in this.filters) {
+      if (this.filters[key] === '' || this.filters[key] === null) {
+        delete this.filters[key];
+      }
+    }
+
+    this.dataSource.filter = JSON.stringify(this.filters);
+    // Verificar si hay alguna búsqueda activa
+    this.busqueda = Object.values(this.filters).some(filter => filter !== "")
+    ? Object.keys(this.filters)
+        .map(key => `${key}: ${this.filters[key]}`)
+        .join(", ")
+    : "";
+
+
+
+    console.log(this.busqueda);
+
+  }
+
+  eraseAllFilters(){
+    // Limpiar el objeto this.filters eliminando propiedades vacías o nulas
+    for (const key in this.filters) {
+      delete this.filters[key];
+    }
+
+    this.dataSource.filter = JSON.stringify(this.filters);
+    // Verificar si hay alguna búsqueda activa
+    this.busqueda = Object.values(this.filters).some(filter => filter !== "")
+    ? Object.keys(this.filters)
+        .map(key => `${key}: ${this.filters[key]}`)
+        .join(", ")
+    : "";
+
+  }
+
+  /*
+  applyAllFilters() {
+    this.dataSource.filterPredicate = (data: any) => {
+      for (const key in this.filters) {
+        if (this.filters[key] !== null) { // Solo aplicar filtro si no es null
+          if (data[key] === null) {
+            console.log("La columna tiene un elemento con un dato invalido: null");
+            return false; // Omitir si hay un dato null
+          } else {
+            if (data[key].toString().toLowerCase().indexOf(this.filters[key]) === -1) {
+              return false; // No se cumple uno de los filtros, no mostrar esta fila
+            }
+          }
         }
       }
       return true; // Se cumplen todos los filtros, mostrar esta fila
     };
     this.dataSource.filter = JSON.stringify(this.filters);
-  }
+  }*/
 
 
 
@@ -502,7 +570,21 @@ export class TabCompComponent {
     data.push(headers);
     // Agregar datos de las filas seleccionadas
     rowsToExport.forEach(row => {
-      const rowData = visibleColumns.map(column => row[column]);
+      const rowData = visibleColumns.map(column =>{
+        // Si la celda es de tipo fecha, hora o fecha y hora, formatearla como texto
+        if (this.cellType(column) === 'date') {
+          return this.formatDate(row[column]);
+        }
+        else if (this.cellType(column) === 'time') {
+          return this.formatTime(row[column]);
+        }
+        else if (this.cellType(column) === 'datetime') {
+          return this.formatDateTime(row[column]);
+        }
+        else {
+          return row[column];
+        }
+        });
       data.push(rowData);
     });
     // Crear un libro de Excel
@@ -515,6 +597,51 @@ export class TabCompComponent {
     // Guardar el libro como archivo Excel
     XLSX.writeFile(workbook, fileName);
   }
+
+  // Métodos de formato para fechas y horas
+  formatDate(value: any): string {
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    if (value !== null){
+      const _date = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year} `;
+      return _date;      
+    }
+    return 'error'
+  }
+  
+  formatTime(value: any): string {
+    const date = new Date(value);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    
+    if (value !== null){
+      const _time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      return _time;
+    }
+    return 'error'
+
+  }
+  
+  formatDateTime(value: any): string {
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    
+    if (value !== null){
+      const _datetime = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}  ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      return _datetime ;
+    }
+    return 'error'
+  }
+  
 
   drop(event: CdkDragDrop<string[]>) {
     const previousIndex = this.displayedColumns.findIndex(col => col === event.item.data);
