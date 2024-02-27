@@ -8,13 +8,17 @@ ya esta:
 * sticky header
 * chips para busqueda por columna 
 
+ya?:
+? arreglar la seleccion con shift al aplicar un filtro
+? arreglar sort al hacer el  filtro 
+? todo lq tenga que ver con el nuevo filtro
+
+
 en proceso:
 - flex correcto en tabla (ancho de cols) ?
 formato para json config
 "config""id": {"typeValue": "date", "pipe": "short", "columName": "#", "total": true},
-- arreglar la seleccion con shift al aplicar un filtro
-- arreglar sort al hacer el  filtro 
-- todo lq tenga que ver con el nuevo filtro
+
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -30,7 +34,7 @@ import { HttpClient } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community';
@@ -127,10 +131,10 @@ export class TabCompComponent {
       this.selection.toggle(row);
     } else if (isShiftPressed && this.lastSelectedRowIndex !== null) {
       // Si Shift está presionado, seleccionar en rango
-      const start = Math.min(this.lastSelectedRowIndex, this.dataSource.data.indexOf(row));
-      const end = Math.max(this.lastSelectedRowIndex, this.dataSource.data.indexOf(row));
+      const start = Math.min(this.lastSelectedRowIndex, this.dataSource.filteredData.indexOf(row));
+      const end = Math.max(this.lastSelectedRowIndex, this.dataSource.filteredData.indexOf(row));
       for (let i = start; i <= end; i++) {
-        this.selection.select(this.dataSource.data[i]);
+        this.selection.select(this.dataSource.filteredData[i]);
       }
     } else {
       // Si no hay teclas especiales, seleccionar solo la fila
@@ -138,7 +142,7 @@ export class TabCompComponent {
       this.selection.select(row);
     }
     // Actualizar el índice de la última fila seleccionada y almacenar la selección antes de la clasificación
-    this.lastSelectedRowIndex = this.dataSource.data.indexOf(row);
+    this.lastSelectedRowIndex = this.dataSource.filteredData.indexOf(row);
     this.preSortSelection = new Set(this.selection.selected);
     this.updateSelectedRowCount()
   }
@@ -330,8 +334,28 @@ export class TabCompComponent {
       for (const item of newSelection) {
         this.selection.select(item);
       }
+      this.lastSelectedRowIndex = this.dataSource.filteredData.indexOf(newSelection[newSelection.length - 1]);
     }
 
+  }
+
+  resetSortAndSelection() {
+    // Restablecer el orden de clasificación
+    if (this.sort) {
+      this.sort.active = '';
+      this.sort.direction = '';
+    }
+  
+    // Limpiar la selección
+    this.selection.clear();
+    this.lastSelectedRowIndex = null;
+    this.preSortSelection.clear();
+    this.selectedRowCount = 0;
+  }
+  
+  pageSizeChange() {
+    // Llama al método resetSortAndSelection
+    this.resetSortAndSelection();
   }
 
   sortChange(event: Sort) {
@@ -342,7 +366,7 @@ export class TabCompComponent {
   selectAllUnselectedRows() {
     if (this.selectedRowCount) {
       // Obtener todas las filas de la fuente de datos
-      const allRows = this.dataSource.data;
+      const allRows = this.dataSource.filteredData;
       // Filtrar las filas que aún no están seleccionadas
       const unselectedRows = allRows.filter(row => !this.selection.isSelected(row));
       // Deseleccionar todas las filas previamente seleccionadas
@@ -350,6 +374,7 @@ export class TabCompComponent {
       // Seleccionar todas las filas que no estaban seleccionadas previamente
       unselectedRows.forEach(row => this.selection.select(row));
     }
+    this.updateSelectedRowCount()
   }
 
   deselectAllRows() {
@@ -415,6 +440,7 @@ export class TabCompComponent {
     }
     //console.log("After removal:", this.filters);
     //console.log("Current busqueda:", this.busqueda);    
+    this.resetSortAndSelection();
   }
 
   eraseAllFilters(){
@@ -434,6 +460,9 @@ export class TabCompComponent {
   }
 
   applyAllFilters() {
+    // Restablecer el orden de clasificación y la selección antes de aplicar los filtros
+    this.resetSortAndSelection();
+
     this.dataSource.filterPredicate = (data: any) => {
       for (const key in this.filters) {
         //console.log(this.filters[key])

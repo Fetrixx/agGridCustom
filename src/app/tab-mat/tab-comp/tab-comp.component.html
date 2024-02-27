@@ -109,21 +109,24 @@
         </ng-container>
       </mat-menu>
 
+      <div style="display: flex; align-items: center; justify-content: center;"> <!--Chips Filtro -->
 
-      <span *ngIf="busqueda !== ''">
-        <mat-chip-listbox>
-          <mat-chip *ngFor="let item of busqueda.split(',')" (removed)="removeItem($event, item)">
-            <span> {{ item }} </span>
-            <mat-icon matChipRemove>cancel</mat-icon>
-          </mat-chip>
-        </mat-chip-listbox>
-      </span>
-
-      <button matTooltip="Eliminar todos los parametros de busqueda"
-        [matTooltipShowDelay]="'1500'" *ngIf="busqueda !== ''" mat-icon-button color="primary"
-        (click)="eraseAllFilters()">
-        <mat-icon>backspace</mat-icon>
-      </button>
+        <span *ngIf="busqueda !== ''" style="display: flex; align-items: center; justify-content: center; gap: 1vw; margin-left: 2vw;">
+          <b> Buscando: </b>
+          <mat-chip-listbox>
+            <mat-chip *ngFor="let item of busqueda.split(',')" (removed)="removeItem($event, item)">
+              <span> {{ item }} </span>
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-listbox>
+        </span>
+  
+        <button style="display: flex; align-items: center; justify-content: center; gap: 1vw;" matTooltip="Eliminar todos los parametros de busqueda" [matTooltipShowDelay]="'1500'"
+          *ngIf="busqueda !== ''" mat-icon-button color="primary" (click)="eraseAllFilters()">
+          <mat-icon>backspace</mat-icon>
+        </button>
+      </div>
+      
 
     </div>
 
@@ -155,7 +158,8 @@
               <div>
                 <mat-form-field (click)="stopPropagation($event)">
                   <mat-label>Buscar</mat-label>
-                  <input  #inputField matInput (input)="applyFilter($event, col)" placeholder="" [value]="filters[col] !== undefined ? filters[col]: ''">
+                  <input #inputField matInput (input)="applyFilter($event, col)" placeholder=""
+                    [value]="filters[col] !== undefined ? filters[col]: ''">
                 </mat-form-field>
               </div>
             </button>
@@ -227,8 +231,8 @@
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json -->
-              <span style="background-color:rgba(202, 202, 202, 0.25); font-weight: bolder;">
-                SIN TIPO: {{element[col]}}
+              <span style="background-color:rgba(202, 202, 202, 0.25); font-style: italic; font-weight: bolder;">
+                {{element[col]}}
               </span>
 
             </ng-container>
@@ -250,7 +254,8 @@
 
     <div class="footer">
       <span style="font-weight: bolder;"> &nbsp; Items Seleccionados: {{selectedRowCount}} </span>
-      <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons></mat-paginator>
+      <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons (pageSizeChange)="pageSizeChange()"></mat-paginator>
+      
     </div>
 
   </div>
