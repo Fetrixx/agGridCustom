@@ -44,6 +44,9 @@ import { AgGridModule } from 'ag-grid-angular';
 import { DatesCustomPipe } from '../pipes/dates-custom.pipe';
 //import { NumberCustomPipe } from '../pipes/number-custom.pipe';
 
+import {MatChipEditedEvent, MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
+
+
 @NgModule({
   declarations: [
     TabCompComponent,
@@ -82,10 +85,10 @@ import { DatesCustomPipe } from '../pipes/dates-custom.pipe';
 
 
     AgGridAngular,
-    AgGridModule
+    AgGridModule,
 
-
-
+    
+    MatChipsModule
 
 
 
