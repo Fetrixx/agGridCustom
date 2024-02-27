@@ -6,12 +6,15 @@ ya esta:
 * archivo de config en el json
 * formatear "date" para mostrar y filtrar correctamente:
 * sticky header
+* chips para busqueda por columna 
 
 en proceso:
 - flex correcto en tabla (ancho de cols) ?
 formato para json config
 "config""id": {"typeValue": "date", "pipe": "short", "columName": "#", "total": true},
--chips para busqueda por columna 
+- arreglar la seleccion con shift al aplicar un filtro
+- arreglar sort al hacer el  filtro 
+- todo lq tenga que ver con el nuevo filtro
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -21,7 +24,7 @@ falta:
 
 
 */
-import { Component, ViewChild, AfterViewInit, HostListener, Input } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, HostListener, Input, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
 import * as XLSX from 'xlsx';
@@ -31,6 +34,13 @@ import { MatPaginator } from '@angular/material/paginator';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community';
+
+import {MatChipEditedEvent, MatChipEvent, MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {LiveAnnouncer} from '@angular/cdk/a11y';
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {inject} from '@angular/core';
+
 
 @Component({
   selector: 'tabla-custom',
@@ -233,19 +243,6 @@ export class TabCompComponent {
     console.log(this.configColumnas)
   }
 
-  loadAttributes() {
-    // Iterar sobre los elementos del array utilizando los valores de allColumns como índices
-    for (let i = 0; i < this.originalColumns.length; i++) {
-      //console.log(typeof (this.originalColumns[i]))
-      //console.log(this.configColumnas[0]['wand']);
-    }
-    //console.log(this.originalColumns)
-    /*
-    for (const columna of this.originalColumns) {
-      console.log(columna);
-    }*/
-  }
-
   refresh() {
     this.hiddenColumns = [];
     // Limpiar los filtros
@@ -363,26 +360,6 @@ export class TabCompComponent {
     this.selectedRowIndex = -1;
   }
 
-  /*
-
-  logSelectedRows() {
-    console.log('Selected Rows:', this.selection.selected);
-  }
-
-  testLog() {
-    //console.log("displayed: " + this.displayedColumns);
-    //console.log("hidden: " + this.hiddenColumns);
-    //console.log('Selected Rows:', this.selection.selected);
-    //console.log(this.displayedColumns.length);
-    console.log(this.displayedColumns);
-
-  }
-
-  getSelectedRowData() {
-    this.logSelectedRows();
-  }
-  */
-
 
   stopPropagation(event: MouseEvent) {
     event.stopPropagation();
@@ -390,31 +367,76 @@ export class TabCompComponent {
 
   filters: { [key: string]: string } = {};
 
-  /*applyFilter(event: Event, columnName: string) {
-    //const colName = columnName.replace(/ /g, '').toLowerCase(); // Elimina espacios y convierte a minúsculas
-    //console.log(colName)
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filterPredicate = (data: any, filter: string) => {
-      const dataStr = data[columnName].toLowerCase();
-      return dataStr.indexOf(filter) !== -1;
-    };
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-  }*/
+
   applyFilter(event: Event, columnName: string) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    //console.log("applyfilter: " + filterValue + " - type;" + typeof(filterValue))
+    //console.log("filters: " + this.filters + " - filters at col;" + this.filters[columnName])
     this.filters[columnName] = filterValue;
     this.applyAllFilters();
   }
 
+
+
   busqueda: string = "";
+
+  @ViewChildren('inputField') inputFields!: QueryList<ElementRef>; // Obtener referencia a los elementos input
+  
+  removeItem(event: MatChipEvent, item: string): void {
+    console.log("this.busqueda antes  = "+this.busqueda)
+    // Verificar si el filtro que se desea eliminar existe
+    const deleteKey = item.split(":")[0].trim();
+    //console.log("Before removal:", this.filters);
+    if (this.filters.hasOwnProperty(deleteKey)) {
+        // Eliminar el filtro específico
+        delete this.filters[deleteKey];
+
+      /*  // Limpiar el valor del input
+      if (this.inputField && this.inputField.nativeElement) {
+        this.inputField.nativeElement.value = '';
+      }*/
+        
+        // Actualizar el filtro en el origen de datos
+        this.dataSource.filter = JSON.stringify(this.filters);
+        
+        // Verificar si hay alguna búsqueda activ, filtros, asi se modifica "busqueda"
+        this.busqueda = Object.values(this.filters).some(filter => filter !== "")
+            ? Object.keys(this.filters)
+                .map(key => `${key}: ${this.filters[key]}`)
+                .join(", ")
+            : "";
+
+        // Limpiar el valor del input correspondiente
+      const inputField = this.inputFields.find(input => input.nativeElement.id === `inputField_${deleteKey}`);
+      if (inputField) {
+        inputField.nativeElement.value = ''; // Establece el valor del input a una cadena vacía
+      }
+      console.log("this.busqueda dps = "+this.busqueda)
+    }
+    //console.log("After removal:", this.filters);
+    //console.log("Current busqueda:", this.busqueda);    
+  }
+
+  eraseAllFilters(){
+    // Limpiar el objeto this.filters eliminando propiedades vacías o nulas
+    for (const key in this.filters) {
+      delete this.filters[key];
+    }
+
+    this.dataSource.filter = JSON.stringify(this.filters);
+    // Verificar si hay alguna búsqueda activa
+    this.busqueda = Object.values(this.filters).some(filter => filter !== "")
+    ? Object.keys(this.filters)
+        .map(key => `${key}: ${this.filters[key]}`)
+        .join(", ")
+    : "";
+
+  }
 
   applyAllFilters() {
     this.dataSource.filterPredicate = (data: any) => {
       for (const key in this.filters) {
-        console.log(this.filters[key])
+        //console.log(this.filters[key])
         if (this.filters[key] !== null && this.filters[key] !== "") { // Solo aplicar filtro si no es null ni una cadena vacía
           if (data[key] === null) {
             return false; // Omitir si hay un dato null
@@ -448,43 +470,6 @@ export class TabCompComponent {
     console.log(this.busqueda);
 
   }
-
-  eraseAllFilters(){
-    // Limpiar el objeto this.filters eliminando propiedades vacías o nulas
-    for (const key in this.filters) {
-      delete this.filters[key];
-    }
-
-    this.dataSource.filter = JSON.stringify(this.filters);
-    // Verificar si hay alguna búsqueda activa
-    this.busqueda = Object.values(this.filters).some(filter => filter !== "")
-    ? Object.keys(this.filters)
-        .map(key => `${key}: ${this.filters[key]}`)
-        .join(", ")
-    : "";
-
-  }
-
-  /*
-  applyAllFilters() {
-    this.dataSource.filterPredicate = (data: any) => {
-      for (const key in this.filters) {
-        if (this.filters[key] !== null) { // Solo aplicar filtro si no es null
-          if (data[key] === null) {
-            console.log("La columna tiene un elemento con un dato invalido: null");
-            return false; // Omitir si hay un dato null
-          } else {
-            if (data[key].toString().toLowerCase().indexOf(this.filters[key]) === -1) {
-              return false; // No se cumple uno de los filtros, no mostrar esta fila
-            }
-          }
-        }
-      }
-      return true; // Se cumplen todos los filtros, mostrar esta fila
-    };
-    this.dataSource.filter = JSON.stringify(this.filters);
-  }*/
-
 
 
   hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas
@@ -550,19 +535,19 @@ export class TabCompComponent {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
     const fileName = `Tabla Exportada ${day}-${month}-${year}  ${hours}.${minutes}.${seconds}.xlsx`;
-
+  
     let rowsToExport: any[] = [];
     if (this.selection.selected.length > 0) {
       // Si se han seleccionado elementos, exportar solo esos elementos
       rowsToExport = this.selection.selected;
     } else {
       // Si no hay elementos seleccionados, exportar toda la tabla
-      rowsToExport = this.dataSource.data;
+      rowsToExport = this.dataSource.filteredData; // Cambia dataSource.data a dataSource.filteredData
     }
     // Filtrar las columnas visibles para la exportación
-
+  
     const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
-
+  
     // Obtener solo los nombres de las columnas visibles
     const headers = visibleColumns.map(column => column);
     // Crear una matriz para almacenar los datos de las filas seleccionadas
@@ -590,13 +575,14 @@ export class TabCompComponent {
     // Crear un libro de Excel
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet(data);
-
+  
     // Agregar la hoja al libro
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos de Tabla');
-
+  
     // Guardar el libro como archivo Excel
     XLSX.writeFile(workbook, fileName);
   }
+  
 
   // Métodos de formato para fechas y horas
   formatDate(value: any): string {
