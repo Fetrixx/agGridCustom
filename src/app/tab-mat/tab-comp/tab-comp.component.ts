@@ -42,11 +42,11 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { GridApi, GridOptions, ColDef, GridReadyEvent } from 'ag-grid-community';
 
-import {MatChipEditedEvent, MatChipEvent, MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {LiveAnnouncer} from '@angular/cdk/a11y';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {inject} from '@angular/core';
+import { MatChipEditedEvent, MatChipEvent, MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { inject } from '@angular/core';
 
 
 interface ColumnConfig {
@@ -202,74 +202,234 @@ export class TabCompComponent {
 
         }
       });
-      
+
   }
 
-  cellType(colId: string): string {
+  cellType___(colId: string): string {
     const normalizedColId = colId.replace(/ /g, '').toLowerCase();
 
-  
+
     for (const col of this.configColumnas) {
       //console.log(this.configColumnas);
-      
+
       // Itera sobre las propiedades del objeto de configuración de columna
       for (const key in col) {
+        //console.log("key: " + key)
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
-  
+
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
+          //console.log("normalizedKey \"" + normalizedKey + "\"normalizedColId \""+ normalizedColId)
           const columnConfig = col[key];
-  
+
           // Verifica si se define el tipo de valor en la configuración
           if (columnConfig && columnConfig.typeValue) {
             // Devuelve el tipo de valor definido en la configuración
-            //console.log( columnConfig.columnName);//tipo: img, string, datetime
+            //console.log( columnConfig.typeValue);//tipo: img, string, datetime
             return columnConfig.typeValue;
-            
+
           }
         }
       }
     }
-  
+
     // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
     return '';
   }
 
+  cellType(colId: string): string {
+    // Encuentra el key correspondiente al columnName
+    const columnNameToFind = colId; // Modifica esto según el columnName que buscas
+    const keyFound = this.findKeyByColumnName(this.configColumnas, columnNameToFind);
 
-  columnNameJson(colId: string): string {
-    const normalizedColId = colId.replace(/ /g, '').toLowerCase();
+    // Si no se encuentra el key, devuelve una cadena vacía
+    if (!keyFound) {
+      //console.log("Si no se encuentra el key, devuelve una cadena vacía") pea
+      return 'asdassa';
+    }
 
-  
     for (const col of this.configColumnas) {
-      //console.log(this.configColumnas);
-      
       // Itera sobre las propiedades del objeto de configuración de columna
       for (const key in col) {
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
-        console.log(normalizedColId);
-        console.log(normalizedKey);
+        //console.log("col: " + col + " key: " + key)
+        // Compara los nombres normalizados
+        if (normalizedKey === keyFound) { // Compara con el key encontrado
+          const type = col[key];
+          // Verifica si se define el tipo de valor en la configuración
+          if (type && type.typeValue) {
+            // Devuelve el tipo de valor definido en la configuración
+            //console.log("columnConfig.typeValue: " + columnConfig.typeValue)
+            if (type.typeValue === 'string') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'string';
+              }
+            }
+            else if (type.typeValue === 'check') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'checkbox';
+              }
+            }
+
+            else if (type.typeValue === 'number') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'number';
+              }
+              else if (type.pipe === 'comma') {
+                return 'number_miles';
+              }
+              else if (type.pipe === 'percent') {
+                return 'percent';
+              }
+              else if (type.pipe === 'USD') {
+                return 'USD';
+              }
+              else if (type.pipe === 'GS') {
+                return 'GS';
+              }
+            }
+            /*else if (type.typeValue === 'number_miles') {
+              return 'number_miles';
+            }*/
+            else if (type.typeValue === 'date') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'date'; //default
+              }
+              else if (type.pipe === 'date') {
+                return 'date';
+              }
+              else if (type.pipe === 'time') {
+                return 'time';
+              }
+              else if (type.pipe === 'datetime') {
+                return 'datetime';
+              }
+              else if (type.pipe === 'short') {
+                return 'short';
+              }
+              else if (type.pipe === 'medium') {
+                return 'medium';
+              }
+              else if (type.pipe === 'long') {
+                return 'long';
+              }
+              else if (type.pipe === 'full') {
+                return 'full';
+              }
+              else if (type.pipe === 'shortDate') {
+                return 'shortDate';
+              }
+              else if (type.pipe === 'mediumDate') {
+                return 'mediumDate';
+              }
+              else if (type.pipe === 'longDate') {
+                return 'longDate';
+              }
+              else if (type.pipe === 'fullDate') {
+                return 'fullDate';
+              }
+              else if (type.pipe === 'shortTime') {
+                return 'shortTime';
+              }
+              else if (type.pipe === 'mediumTime') {
+                return 'mediumTime';
+              }
+              else if (type.pipe === 'longTime') {
+                return 'longTime';
+              }
+              else if (type.pipe === 'fullTime') {
+                return 'fullTime';
+              }
+
+              else { // si pipe es "" , default
+                return 'date'
+              }
+            }
+            /*else if (type.typeValue === 'datetime') {
+              return 'datetime';
+            }
+            else if (type.typeValue === 'time') {
+              return 'time';
+            }*/
+            else if (type.typeValue === 'url') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'url';
+              }
+              return 'url';
+            }
+            else if (type.typeValue === 'img') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'img';
+              }
+              return 'img';
+            }
+            else if (type.typeValue === 'nestedObject') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'nestedObject';
+              }
+              return 'nestedObject';
+            }
+            //return type.typeValue;
+          }
+        }
+      }
+    }
+
+    // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
+    return '';
+  }
+
+  nestedToString(val: any) {
+    return JSON.stringify(val).replace(/"|\[|\{/g, ' ').replace(/\]|\}/g, '');
+  }
+
+  findKeyByColumnName(config: any[], columnName: string): string | undefined {
+    for (const item of config) {
+      for (const key in item) {
+        if (item[key].columnName === columnName) {
+          return key;
+        }
+      }
+    }
+
+    return undefined; // Si no se encuentra el columnName
+  }
+
+  columnNameJson(colId: string): string {
+    const normalizedColId = colId.replace(/ /g, '').toLowerCase();
+
+
+    for (const col of this.configColumnas) {
+      //console.log(this.configColumnas);
+
+      // Itera sobre las propiedades del objeto de configuración de columna
+      for (const key in col) {
+        // Normaliza el nombre de la columna en el objeto de configuración
+        const normalizedKey = key.replace(/ /g, '').toLowerCase();
+        //console.log(normalizedColId);
+        //console.log(normalizedKey);
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
           const columnConfig = col[key];
-  
+
           // Verifica si se define el tipo de valor en la configuración
           if (columnConfig && columnConfig.typeValue) {
             // Devuelve el tipo de valor definido en la configuración
             //console.log( columnConfig.typeValue);//tipo: img, string, datetime
             return columnConfig.columnName;
-            console.log(columnConfig.columnName)
+            //console.log(columnConfig.columnName)
           }
         }
       }
     }
-  
+
     // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
     return '';
   }
 
-  
+
   cellType_(colId: string) {
     // col id es el nombre de la columna del item actual
     //console.log(this.originalColumns)
@@ -279,10 +439,10 @@ export class TabCompComponent {
     //colId = colId.toLowerCase();
     //colId.replace(/\s+/g , '');
     //console.log(colId);
-    
+
     for (const col of this.configColumnas) {
       //console.log(col);
-      
+
       for (const key in col) {
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
@@ -290,7 +450,7 @@ export class TabCompComponent {
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
           const type = col[key];
-          
+
           if (type === 'string') {
             return 'string';
           }
@@ -345,13 +505,54 @@ export class TabCompComponent {
     // Cargar los datos actualizados en la tabla
     this.loadTableDataSelector();
     this.deselectAllRows();
-
+    this.eraseAllFilters();
   }
 
+  loadTableDataSelector_() { // columnNames bien
+    this.http.get<{ config: any[], data: any[] }>(this.jsonLink)
+      .subscribe(response => {
+        if (response.data.length > 0 && response.config.length > 0) {
+          const columnConfig = response.config[0]; // Se asume que solo hay un objeto de configuración
+          const modifiedData = response.data.map(item => {
+            const modifiedItem: { [key: string]: any } = {};
+            for (const key in item) {
+              const columnName = columnConfig[key]?.columnName || key;
+              modifiedItem[columnName] = item[key];
+            }
+            return modifiedItem;
+          });
+
+          this.originalColumns = Object.keys(response.data[0]);
+          this.displayedColumns = Object.keys(modifiedData[0]);
+          this.allColumns = this.displayedColumns;
+          this.dataSource.data = modifiedData;
+          this.dataSource.paginator = this.paginator;
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+            this.dataSource.sort.sortChange.subscribe(() => {
+              this.adjustSelectionAfterSort();
+            });
+          }
+          this.displayedColumns.forEach(column => {
+            this.columnVisibility[column] = true;
+          });
+
+          const group: any = {};
+          this.displayedColumns.forEach(column => {
+            group[column] = new FormControl(true);
+          });
+          this.columnsFormGroup = this.formBuilder.group(group);
+          //console.log("displayedCols: " + this.displayedColumns)
+          //console.log("originalCols: " + this.originalColumns)
+        }
+      });
+  }
+
+
   loadTableDataSelector() {
-    this.http.get<{ data: any[] }>(this.jsonLink) // get "data" de type any[] dentro del json
-      .subscribe(data => { // acceder a .data del item "data" del json
-        if (data.data.length > 0) {
+    this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+      .subscribe(response => { // acceder a .data del item "data" del json
+        if (response.data.length > 0) {
           // Función para eliminar caracteres no deseados de objetos anidados
           const removeBrackets = (value: any) => {
             if (typeof value === 'object' && value !== null) {
@@ -364,7 +565,7 @@ export class TabCompComponent {
           };
 
           // Mapear los objetos para convertir los objetos anidados a strings
-          const modifiedData = data.data.map(item => {                    // acceder a .data del item "data" del json
+          const modifiedData = response.data.map(item => {                    // acceder a .data del item "data" del json
             const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
               modifiedItem[this.formatColumnName(key)] = removeBrackets(item[key]);
@@ -372,18 +573,27 @@ export class TabCompComponent {
             return modifiedItem;
           });
 
-          const colsOriginales = data.data.map(item => {
+          const columnConfig = response.config[0]; // Se asume que solo hay un objeto de configuración
+          const colNameData = response.data.map(item => {
+            const colNameItem: { [key: string]: any } = {};
+            for (const key in item) {
+              const columnName = columnConfig[key]?.columnName || key;
+              colNameItem[columnName] = item[key];
+            }
+            return colNameItem;
+          });
+
+          const colsOriginales = response.data.map(item => {
             const originalItems: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
               originalItems[key] = item[key];
             }
             return originalItems;
           })
-
           this.originalColumns = Object.keys(colsOriginales[0]);
-          this.displayedColumns = Object.keys(modifiedData[0]);
+          this.displayedColumns = Object.keys(colNameData[0]);
           this.allColumns = Object.keys(modifiedData[0]);
-          this.dataSource.data = modifiedData;
+          this.dataSource.data = colNameData;
           this.dataSource.paginator = this.paginator;
           if (this.sort) {
             this.dataSource.sort = this.sort;
@@ -401,6 +611,8 @@ export class TabCompComponent {
             group[column] = new FormControl(true); // Todos inicialmente marcados como visibles
           });
           this.columnsFormGroup = this.formBuilder.group(group);
+          //console.log("displayedCols: " + this.displayedColumns)
+          //console.log("originalCols: " + this.originalColumns)
         }
       });
   }
@@ -429,14 +641,14 @@ export class TabCompComponent {
       this.sort.active = '';
       this.sort.direction = '';
     }
-  
+
     // Limpiar la selección
     this.selection.clear();
     this.lastSelectedRowIndex = null;
     this.preSortSelection.clear();
     this.selectedRowCount = 0;
   }
-  
+
   pageSizeChange() {
     // Llama al método resetSortAndSelection
     this.resetSortAndSelection();
@@ -490,44 +702,44 @@ export class TabCompComponent {
   busqueda: string = "";
 
   @ViewChildren('inputField') inputFields!: QueryList<ElementRef>; // Obtener referencia a los elementos input
-  
+
   removeItem(event: MatChipEvent, item: string): void {
-    console.log("this.busqueda antes  = "+this.busqueda)
+    console.log("this.busqueda antes  = " + this.busqueda)
     // Verificar si el filtro que se desea eliminar existe
     const deleteKey = item.split(":")[0].trim();
     //console.log("Before removal:", this.filters);
     if (this.filters.hasOwnProperty(deleteKey)) {
-        // Eliminar el filtro específico
-        delete this.filters[deleteKey];
+      // Eliminar el filtro específico
+      delete this.filters[deleteKey];
 
       /*  // Limpiar el valor del input
       if (this.inputField && this.inputField.nativeElement) {
         this.inputField.nativeElement.value = '';
       }*/
-        
-        // Actualizar el filtro en el origen de datos
-        this.dataSource.filter = JSON.stringify(this.filters);
-        
-        // Verificar si hay alguna búsqueda activ, filtros, asi se modifica "busqueda"
-        this.busqueda = Object.values(this.filters).some(filter => filter !== "")
-            ? Object.keys(this.filters)
-                .map(key => `${key}: ${this.filters[key]}`)
-                .join(", ")
-            : "";
 
-        // Limpiar el valor del input correspondiente
+      // Actualizar el filtro en el origen de datos
+      this.dataSource.filter = JSON.stringify(this.filters);
+
+      // Verificar si hay alguna búsqueda activ, filtros, asi se modifica "busqueda"
+      this.busqueda = Object.values(this.filters).some(filter => filter !== "")
+        ? Object.keys(this.filters)
+          .map(key => `${key}: ${this.filters[key]}`)
+          .join(", ")
+        : "";
+
+      // Limpiar el valor del input correspondiente
       const inputField = this.inputFields.find(input => input.nativeElement.id === `inputField_${deleteKey}`);
       if (inputField) {
         inputField.nativeElement.value = ''; // Establece el valor del input a una cadena vacía
       }
-      console.log("this.busqueda dps = "+this.busqueda)
+      console.log("this.busqueda dps = " + this.busqueda)
     }
     //console.log("After removal:", this.filters);
     //console.log("Current busqueda:", this.busqueda);    
     this.resetSortAndSelection();
   }
 
-  eraseAllFilters(){
+  eraseAllFilters() {
     // Limpiar el objeto this.filters eliminando propiedades vacías o nulas
     for (const key in this.filters) {
       delete this.filters[key];
@@ -536,10 +748,10 @@ export class TabCompComponent {
     this.dataSource.filter = JSON.stringify(this.filters);
     // Verificar si hay alguna búsqueda activa
     this.busqueda = Object.values(this.filters).some(filter => filter !== "")
-    ? Object.keys(this.filters)
+      ? Object.keys(this.filters)
         .map(key => `${key}: ${this.filters[key]}`)
         .join(", ")
-    : "";
+      : "";
 
   }
 
@@ -573,10 +785,10 @@ export class TabCompComponent {
     this.dataSource.filter = JSON.stringify(this.filters);
     // Verificar si hay alguna búsqueda activa
     this.busqueda = Object.values(this.filters).some(filter => filter !== "")
-    ? Object.keys(this.filters)
+      ? Object.keys(this.filters)
         .map(key => `${key}: ${this.filters[key]}`)
         .join(", ")
-    : "";
+      : "";
 
 
 
@@ -648,7 +860,7 @@ export class TabCompComponent {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
     const fileName = `Tabla Exportada ${day}-${month}-${year}  ${hours}.${minutes}.${seconds}.xlsx`;
-  
+
     let rowsToExport: any[] = [];
     if (this.selection.selected.length > 0) {
       // Si se han seleccionado elementos, exportar solo esos elementos
@@ -658,9 +870,9 @@ export class TabCompComponent {
       rowsToExport = this.dataSource.filteredData; // Cambia dataSource.data a dataSource.filteredData
     }
     // Filtrar las columnas visibles para la exportación
-  
+
     const visibleColumns = this.displayedColumns.filter(column => column !== 'select');
-  
+
     // Obtener solo los nombres de las columnas visibles
     const headers = visibleColumns.map(column => column);
     // Crear una matriz para almacenar los datos de las filas seleccionadas
@@ -668,7 +880,7 @@ export class TabCompComponent {
     data.push(headers);
     // Agregar datos de las filas seleccionadas
     rowsToExport.forEach(row => {
-      const rowData = visibleColumns.map(column =>{
+      const rowData = visibleColumns.map(column => {
         // Si la celda es de tipo fecha, hora o fecha y hora, formatearla como texto
         if (this.cellType(column) === 'date') {
           return this.formatDate(row[column]);
@@ -682,20 +894,20 @@ export class TabCompComponent {
         else {
           return row[column];
         }
-        });
+      });
       data.push(rowData);
     });
     // Crear un libro de Excel
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet(data);
-  
+
     // Agregar la hoja al libro
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos de Tabla');
-  
+
     // Guardar el libro como archivo Excel
     XLSX.writeFile(workbook, fileName);
   }
-  
+
 
   // Métodos de formato para fechas y horas
   formatDate(value: any): string {
@@ -703,28 +915,28 @@ export class TabCompComponent {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    
-    if (value !== null){
+
+    if (value !== null) {
       const _date = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year} `;
-      return _date;      
+      return _date;
     }
     return 'error'
   }
-  
+
   formatTime(value: any): string {
     const date = new Date(value);
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    
-    if (value !== null){
+
+    if (value !== null) {
       const _time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
       return _time;
     }
     return 'error'
 
   }
-  
+
   formatDateTime(value: any): string {
     const date = new Date(value);
     const year = date.getFullYear();
@@ -733,14 +945,14 @@ export class TabCompComponent {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    
-    if (value !== null){
+
+    if (value !== null) {
       const _datetime = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}  ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      return _datetime ;
+      return _datetime;
     }
     return 'error'
   }
-  
+
 
   drop(event: CdkDragDrop<string[]>) {
     const previousIndex = this.displayedColumns.findIndex(col => col === event.item.data);
@@ -751,7 +963,6 @@ export class TabCompComponent {
     this.displayedColumns.splice(previousIndex, 1);
     this.displayedColumns.splice(newIndex, 0, columnToMove);
   }
-
 
   // ---------------------------------------------------------------------------------- AG GRID SECTION ---------------------------------------------------------------------------------- 
 
