@@ -93,6 +93,19 @@
         <span> Mostrar Columnas </span>
       </button>
 
+
+      <button mat-raised-button
+        color="primary" (click)="cargarTotales();">
+        <mat-icon fontIcon="compare_arrows"></mat-icon>
+        <span>CARGAR TOTAL</span>
+      </button>
+      
+      <button mat-raised-button
+        color="primary" (click)="calcularTotal();">
+        <mat-icon fontIcon="compare_arrows"></mat-icon>
+        <span>CALCULAR TOTAL</span>
+      </button>
+      
       <mat-menu #columnas="matMenu"> <!-- opciones de "mostrar columnas" -->
         <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
           <span> {{ column }} </span>

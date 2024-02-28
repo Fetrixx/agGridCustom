@@ -8,7 +8,7 @@
             "gender": {"typeValue": "string", "pipe": "", "columnName": "GENDER", "total": false},
             "house": {"typeValue": "string", "pipe": "", "columnName": "HOUSE", "total": false},
             "date_of_birth": {"typeValue": "date", "pipe": "datetime", "columnName": "BIRTH DATE", "total": false},
-            "year_of_birth": {"typeValue": "number", "pipe": "comma", "columnName": "YEAR", "total": false},
+            "year_of_birth": {"typeValue": "number", "pipe": "comma", "columnName": "YEAR", "total": true},
             "wizard": {"typeValue": "check", "pipe": "", "columnName": "WIZARD", "total": false},
             "ancestry": {"typeValue": "string", "pipe": "", "columnName": "ANCESTRY", "total": false},
             "eye_colour": {"typeValue": "string", "pipe": "", "columnName": "EYES", "total": false},

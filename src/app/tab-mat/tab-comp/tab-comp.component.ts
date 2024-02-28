@@ -17,11 +17,11 @@ ya?:
 en proceso:
 - flex correcto en tabla (ancho de cols) ?
 formato para json config
-"config""id": {"typeValue": "date", "pipe": "short", "columName": "#", "total": true},
+"config""id": {"total": true}, 
+- calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico.
+- (total de todos?, en pantalla? seleccionados?)
+- al exportar, algunos datos estan mal formateados: alt name,birth date(null), wand
 
-
-+++ hacer que cada columna sea igual al "columnName", similar al metodo cellType, pero con .columnName en vez de Type
-habilitar el total
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -184,58 +184,95 @@ export class TabCompComponent {
       .subscribe(data => {
         if (data && data.config && data.config.length > 0) {
           const configData = data.config;
-          ///console.log(configData);
           this.configColumnas = configData;
-          //console.log(this.configColumnas[0].id);
-          //console.log(this.configColumnas[0].wand);
-          //console.log(this.configColumnas[0]['wand']);
-          for (let i = 0; i < this.originalColumns.length; i++) { // si funca para leer 
-            //console.log(this.configColumnas[0]['wand']);
-            //console.log(this.configColumnas[0][this.originalColumns[i]]); // SI LEE
-          }
-
-          for (const columna of this.originalColumns) {
-            //console.log(this.configColumnas[0][columna]); // SI LEE, da el dato de string, number, date, etc
-
-
-          }
-
         }
       });
 
   }
 
-  cellType___(colId: string): string {
-    const normalizedColId = colId.replace(/ /g, '').toLowerCase();
+  /*calculateTotalPrices() {
+    const config = jsonL.config;
+    const data = json.data;
+
+    const totalField = config.find(field => field.price.total === true)?.id;
+    if (totalField) {
+      this.totalPrices = data.reduce((total, item) => {
+        if (item[totalField] === 'price') {
+          return total + item.price;
+        }
+        return total;
+      }, 0);
+    }
+  }*/
+
+  totalesCols: any[] = [];
 
 
-    for (const col of this.configColumnas) {
-      //console.log(this.configColumnas);
-
-      // Itera sobre las propiedades del objeto de configuración de columna
-      for (const key in col) {
-        //console.log("key: " + key)
-        // Normaliza el nombre de la columna en el objeto de configuración
-        const normalizedKey = key.replace(/ /g, '').toLowerCase();
-
-        // Compara los nombres normalizados
-        if (normalizedKey === normalizedColId) {
-          //console.log("normalizedKey \"" + normalizedKey + "\"normalizedColId \""+ normalizedColId)
-          const columnConfig = col[key];
-
-          // Verifica si se define el tipo de valor en la configuración
-          if (columnConfig && columnConfig.typeValue) {
-            // Devuelve el tipo de valor definido en la configuración
-            //console.log( columnConfig.typeValue);//tipo: img, string, datetime
-            return columnConfig.typeValue;
-
+  cargarTotales(){
+    if (this.totalesCols.length === 0){
+      this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+      .subscribe(response => { // acceder a .data del item "data" del json
+        const config = response.config;
+        const data = response.data;
+        for (const col of this.configColumnas){
+          for (const key in col){
+            this.totalesCols.push({ name: config[0][key].columnName + " total", total: 0 });
           }
         }
-      }
+        console.log("CREADO ARRAY TOTALES")
+        console.log(this.totalesCols)
+      });
+    }
+    console.log("ARRAY EXISTENTES TOTALES")
+    console.log(this.totalesCols)
+  }
+
+  calcularTotal() {
+    if (this.totalesCols.length === 0){
+      this.cargarTotales();
     }
 
-    // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
-    return '';
+    
+    
+    this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+      .subscribe(response => { // acceder a .data del item "data" del json
+        const config = response.config;
+        const data = response.data;
+        //console.log("config: "+ this.nestedToString(config.))
+
+        //console.log("config columnas: "+ this.nestedToString( this.configColumnas))
+
+
+        for (const col of this.configColumnas){
+          for (const key in col){
+            //console.log("col: "+ this.nestedToString(config[0][key]) + "\n")
+            if (config[0][key].total){ // si hay alguno con valor true
+              let _total = 0;
+              for (const item of data){ // Recorre todos los elementos de data
+                _total += item[key]; // Suma el valor correspondiente a la clave key de cada elemento
+                console.log(item[key]);
+              }
+              //_total += data[0][key]; //tomar valor
+              // AGREGAR EL KEY QUE ES TRUE A UNA LISTA, Y SACAR SU TOTAL, EJEMPLO "YEAR": {"total": true}, "YEAR": 
+              //this.totalesCols.findIndex(total => total.name === config[0][key].columnName + " total")  
+              const existingTotalIndex = this.totalesCols.findIndex(total => total.name === config[0][key].columnName + " total");
+              if (existingTotalIndex !== -1) {
+                this.totalesCols[existingTotalIndex].total += _total;
+              } else {
+                this.totalesCols.push({ name: config[0][key].columnName + " total", total: _total });
+              }
+
+              //console.log(config[0][key]); // objeto de config
+              //console.log(data[0][key]); // tomar el valor de data y agregarlo a una lista "totales"
+              //this.totalesCols
+            }
+            
+            //this.totalesCols.push({ name: config[0][key].columnName + " total", total: _total });
+          }
+        }
+        console.log("TOTALES AHORA: ")
+        console.log(this.totalesCols)
+      });
   }
 
   cellType(colId: string): string {
@@ -245,7 +282,6 @@ export class TabCompComponent {
 
     // Si no se encuentra el key, devuelve una cadena vacía
     if (!keyFound) {
-      //console.log("Si no se encuentra el key, devuelve una cadena vacía") pea
       return 'asdassa';
     }
 
@@ -254,14 +290,12 @@ export class TabCompComponent {
       for (const key in col) {
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
-        //console.log("col: " + col + " key: " + key)
         // Compara los nombres normalizados
         if (normalizedKey === keyFound) { // Compara con el key encontrado
           const type = col[key];
           // Verifica si se define el tipo de valor en la configuración
           if (type && type.typeValue) {
             // Devuelve el tipo de valor definido en la configuración
-            //console.log("columnConfig.typeValue: " + columnConfig.typeValue)
             if (type.typeValue === 'string') {
               if (type.pipe === 'default' || type.pipe === '') {
                 return 'string';
@@ -347,12 +381,6 @@ export class TabCompComponent {
                 return 'date'
               }
             }
-            /*else if (type.typeValue === 'datetime') {
-              return 'datetime';
-            }
-            else if (type.typeValue === 'time') {
-              return 'time';
-            }*/
             else if (type.typeValue === 'url') {
               if (type.pipe === 'default' || type.pipe === '') {
                 return 'url';
@@ -402,24 +430,17 @@ export class TabCompComponent {
 
 
     for (const col of this.configColumnas) {
-      //console.log(this.configColumnas);
-
       // Itera sobre las propiedades del objeto de configuración de columna
       for (const key in col) {
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
-        //console.log(normalizedColId);
-        //console.log(normalizedKey);
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
           const columnConfig = col[key];
-
           // Verifica si se define el tipo de valor en la configuración
           if (columnConfig && columnConfig.typeValue) {
             // Devuelve el tipo de valor definido en la configuración
-            //console.log( columnConfig.typeValue);//tipo: img, string, datetime
             return columnConfig.columnName;
-            //console.log(columnConfig.columnName)
           }
         }
       }
@@ -427,68 +448,6 @@ export class TabCompComponent {
 
     // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
     return '';
-  }
-
-
-  cellType_(colId: string) {
-    // col id es el nombre de la columna del item actual
-    //console.log(this.originalColumns)
-    //colId = colId.replace(/\s+/g, '').toLowerCase();
-    const normalizedColId = colId.replace(/ /g, '').toLowerCase(); // Elimina espacios y convierte a minúsculas
-
-    //colId = colId.toLowerCase();
-    //colId.replace(/\s+/g , '');
-    //console.log(colId);
-
-    for (const col of this.configColumnas) {
-      //console.log(col);
-
-      for (const key in col) {
-        // Normaliza el nombre de la columna en el objeto de configuración
-        const normalizedKey = key.replace(/ /g, '').toLowerCase();
-
-        // Compara los nombres normalizados
-        if (normalizedKey === normalizedColId) {
-          const type = col[key];
-
-          if (type === 'string') {
-            return 'string';
-          }
-          else if (type === 'check') {
-            return 'checkbox';
-          }
-
-          else if (type === 'number') {
-            return 'number';
-          }
-          else if (type === 'number_miles') {
-            return 'number_miles';
-          }
-          else if (type === 'date') {
-            return 'date';
-          }
-          else if (type === 'datetime') {
-            return 'datetime';
-          }
-          else if (type === 'time') {
-            return 'time';
-          }
-          else if (type === 'url') {
-            return 'url';
-          }
-          else if (type === 'img') {
-            return 'img';
-          }
-
-        }
-      }
-    }
-    return ''
-  }
-
-  testog() {
-    console.log(this.originalColumns)
-    console.log(this.configColumnas)
   }
 
   refresh() {
@@ -507,47 +466,6 @@ export class TabCompComponent {
     this.deselectAllRows();
     this.eraseAllFilters();
   }
-
-  loadTableDataSelector_() { // columnNames bien
-    this.http.get<{ config: any[], data: any[] }>(this.jsonLink)
-      .subscribe(response => {
-        if (response.data.length > 0 && response.config.length > 0) {
-          const columnConfig = response.config[0]; // Se asume que solo hay un objeto de configuración
-          const modifiedData = response.data.map(item => {
-            const modifiedItem: { [key: string]: any } = {};
-            for (const key in item) {
-              const columnName = columnConfig[key]?.columnName || key;
-              modifiedItem[columnName] = item[key];
-            }
-            return modifiedItem;
-          });
-
-          this.originalColumns = Object.keys(response.data[0]);
-          this.displayedColumns = Object.keys(modifiedData[0]);
-          this.allColumns = this.displayedColumns;
-          this.dataSource.data = modifiedData;
-          this.dataSource.paginator = this.paginator;
-          if (this.sort) {
-            this.dataSource.sort = this.sort;
-            this.dataSource.sort.sortChange.subscribe(() => {
-              this.adjustSelectionAfterSort();
-            });
-          }
-          this.displayedColumns.forEach(column => {
-            this.columnVisibility[column] = true;
-          });
-
-          const group: any = {};
-          this.displayedColumns.forEach(column => {
-            group[column] = new FormControl(true);
-          });
-          this.columnsFormGroup = this.formBuilder.group(group);
-          //console.log("displayedCols: " + this.displayedColumns)
-          //console.log("originalCols: " + this.originalColumns)
-        }
-      });
-  }
-
 
   loadTableDataSelector() {
     this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
@@ -611,8 +529,6 @@ export class TabCompComponent {
             group[column] = new FormControl(true); // Todos inicialmente marcados como visibles
           });
           this.columnsFormGroup = this.formBuilder.group(group);
-          //console.log("displayedCols: " + this.displayedColumns)
-          //console.log("originalCols: " + this.originalColumns)
         }
       });
   }
@@ -691,31 +607,20 @@ export class TabCompComponent {
 
   applyFilter(event: Event, columnName: string) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    //console.log("applyfilter: " + filterValue + " - type;" + typeof(filterValue))
-    //console.log("filters: " + this.filters + " - filters at col;" + this.filters[columnName])
     this.filters[columnName] = filterValue;
     this.applyAllFilters();
   }
-
-
 
   busqueda: string = "";
 
   @ViewChildren('inputField') inputFields!: QueryList<ElementRef>; // Obtener referencia a los elementos input
 
   removeItem(event: MatChipEvent, item: string): void {
-    console.log("this.busqueda antes  = " + this.busqueda)
     // Verificar si el filtro que se desea eliminar existe
     const deleteKey = item.split(":")[0].trim();
-    //console.log("Before removal:", this.filters);
     if (this.filters.hasOwnProperty(deleteKey)) {
       // Eliminar el filtro específico
       delete this.filters[deleteKey];
-
-      /*  // Limpiar el valor del input
-      if (this.inputField && this.inputField.nativeElement) {
-        this.inputField.nativeElement.value = '';
-      }*/
 
       // Actualizar el filtro en el origen de datos
       this.dataSource.filter = JSON.stringify(this.filters);
@@ -732,10 +637,7 @@ export class TabCompComponent {
       if (inputField) {
         inputField.nativeElement.value = ''; // Establece el valor del input a una cadena vacía
       }
-      console.log("this.busqueda dps = " + this.busqueda)
     }
-    //console.log("After removal:", this.filters);
-    //console.log("Current busqueda:", this.busqueda);    
     this.resetSortAndSelection();
   }
 
@@ -761,7 +663,6 @@ export class TabCompComponent {
 
     this.dataSource.filterPredicate = (data: any) => {
       for (const key in this.filters) {
-        //console.log(this.filters[key])
         if (this.filters[key] !== null && this.filters[key] !== "") { // Solo aplicar filtro si no es null ni una cadena vacía
           if (data[key] === null) {
             return false; // Omitir si hay un dato null
@@ -789,16 +690,9 @@ export class TabCompComponent {
         .map(key => `${key}: ${this.filters[key]}`)
         .join(", ")
       : "";
-
-
-
-    console.log(this.busqueda);
-
   }
 
-
   hiddenColumns: string[] = []; // Array para almacenar las columnas ocultas
-
 
   // Método para mostrar una columna oculta
   showColumn(column: string) {
@@ -829,9 +723,7 @@ export class TabCompComponent {
       // La columna está actualmente oculta, así que la mostramos
       this.showColumn(column);
     }
-
   }
-
 
   refreshColumnVisibility(column: string) {
     const indexInDisplayed = this.displayedColumns.indexOf(column);
@@ -841,10 +733,8 @@ export class TabCompComponent {
     if (indexInHidden !== -1) {
       // La columna está actualmente oculta, así que la mostramos
       this.showColumn(column);
-
       if (indexInHidden !== -1) {
         this.displayedColumns.splice(indexInHidden, 1); // Eliminar la columna de las columnas ocultas
-        //this.hiddenColumns.push(column);
       }
 
     }
@@ -908,7 +798,6 @@ export class TabCompComponent {
     XLSX.writeFile(workbook, fileName);
   }
 
-
   // Métodos de formato para fechas y horas
   formatDate(value: any): string {
     const date = new Date(value);
@@ -952,7 +841,6 @@ export class TabCompComponent {
     }
     return 'error'
   }
-
 
   drop(event: CdkDragDrop<string[]>) {
     const previousIndex = this.displayedColumns.findIndex(col => col === event.item.data);
@@ -1004,9 +892,6 @@ export class TabCompComponent {
       });
   }
 
-
-
-
   private generateColumnDefs_Ag(data: any[]): ColDef[] {
     if (data.length === 0) {
       return [];
@@ -1040,11 +925,6 @@ export class TabCompComponent {
     XLSX.writeFile(workbook, fileName);
   }
 
-
-
-
-
-
   exportAllToExcel_Ag() {
     const now = new Date();
     const day = now.getDate().toString().padStart(2, '0');
@@ -1064,7 +944,6 @@ export class TabCompComponent {
 
   getSelectedRowData_Ag() {
     const selectedData = this.gridApi.getSelectedRows();
-    //console.log(selectedData);
     return selectedData;
   }
 
