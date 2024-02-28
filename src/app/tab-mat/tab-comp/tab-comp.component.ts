@@ -20,6 +20,9 @@ formato para json config
 "config""id": {"typeValue": "date", "pipe": "short", "columName": "#", "total": true},
 
 
++++ hacer que cada columna sea igual al "columnName", similar al metodo cellType, pero con .columnName en vez de Type
+habilitar el total
+
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
 - pivot (?)
