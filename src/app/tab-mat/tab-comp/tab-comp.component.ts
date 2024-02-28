@@ -46,6 +46,16 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {inject} from '@angular/core';
 
 
+interface ColumnConfig {
+  [key: string]: {
+    typeValue: string;
+    pipe: string;
+    columnName: string;
+    total: boolean;
+  };
+}
+
+
 @Component({
   selector: 'tabla-custom',
   templateUrl: './tab-comp.component.html',
@@ -167,10 +177,11 @@ export class TabCompComponent {
 
   configColumnas: any[] = [];
   loadConfigData() {
-    this.http.get<{ config: any[] }>(this.jsonLink) // get "config" de type any[] dentro del json
+    this.http.get<{ config: ColumnConfig[] }>(this.jsonLink) // get "config" de type any[] dentro del json
       .subscribe(data => {
         if (data && data.config && data.config.length > 0) {
           const configData = data.config;
+          ///console.log(configData);
           this.configColumnas = configData;
           //console.log(this.configColumnas[0].id);
           //console.log(this.configColumnas[0].wand);
@@ -188,9 +199,75 @@ export class TabCompComponent {
 
         }
       });
+      
   }
 
-  cellType(colId: string) {
+  cellType(colId: string): string {
+    const normalizedColId = colId.replace(/ /g, '').toLowerCase();
+
+  
+    for (const col of this.configColumnas) {
+      //console.log(this.configColumnas);
+      
+      // Itera sobre las propiedades del objeto de configuración de columna
+      for (const key in col) {
+        // Normaliza el nombre de la columna en el objeto de configuración
+        const normalizedKey = key.replace(/ /g, '').toLowerCase();
+  
+        // Compara los nombres normalizados
+        if (normalizedKey === normalizedColId) {
+          const columnConfig = col[key];
+  
+          // Verifica si se define el tipo de valor en la configuración
+          if (columnConfig && columnConfig.typeValue) {
+            // Devuelve el tipo de valor definido en la configuración
+            //console.log( columnConfig.columnName);//tipo: img, string, datetime
+            return columnConfig.typeValue;
+            
+          }
+        }
+      }
+    }
+  
+    // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
+    return '';
+  }
+
+
+  columnNameJson(colId: string): string {
+    const normalizedColId = colId.replace(/ /g, '').toLowerCase();
+
+  
+    for (const col of this.configColumnas) {
+      //console.log(this.configColumnas);
+      
+      // Itera sobre las propiedades del objeto de configuración de columna
+      for (const key in col) {
+        // Normaliza el nombre de la columna en el objeto de configuración
+        const normalizedKey = key.replace(/ /g, '').toLowerCase();
+        console.log(normalizedColId);
+        console.log(normalizedKey);
+        // Compara los nombres normalizados
+        if (normalizedKey === normalizedColId) {
+          const columnConfig = col[key];
+  
+          // Verifica si se define el tipo de valor en la configuración
+          if (columnConfig && columnConfig.typeValue) {
+            // Devuelve el tipo de valor definido en la configuración
+            //console.log( columnConfig.typeValue);//tipo: img, string, datetime
+            return columnConfig.columnName;
+            console.log(columnConfig.columnName)
+          }
+        }
+      }
+    }
+  
+    // Devuelve una cadena vacía si no se encuentra el tipo de valor para la columna
+    return '';
+  }
+
+  
+  cellType_(colId: string) {
     // col id es el nombre de la columna del item actual
     //console.log(this.originalColumns)
     //colId = colId.replace(/\s+/g, '').toLowerCase();
@@ -199,7 +276,10 @@ export class TabCompComponent {
     //colId = colId.toLowerCase();
     //colId.replace(/\s+/g , '');
     //console.log(colId);
+    
     for (const col of this.configColumnas) {
+      //console.log(col);
+      
       for (const key in col) {
         // Normaliza el nombre de la columna en el objeto de configuración
         const normalizedKey = key.replace(/ /g, '').toLowerCase();
@@ -207,6 +287,7 @@ export class TabCompComponent {
         // Compara los nombres normalizados
         if (normalizedKey === normalizedColId) {
           const type = col[key];
+          
           if (type === 'string') {
             return 'string';
           }
