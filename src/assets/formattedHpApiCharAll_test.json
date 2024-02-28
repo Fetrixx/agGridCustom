@@ -3,7 +3,7 @@
         {
             "id": {"typeValue": "string", "pipe": "", "columnName": "ID", "total": false},
             "name": {"typeValue": "string", "pipe": "", "columnName": "NAME", "total": false},
-            "alternate_names": {"typeValue": "string", "pipe": "", "columnName": "ALT NAME", "total": false},
+            "alternate_names": {"typeValue": "list", "pipe": "", "columnName": "ALT NAME", "total": false},
             "species": {"typeValue": "string", "pipe": "", "columnName": "SPECIES", "total": false},
             "gender": {"typeValue": "string", "pipe": "", "columnName": "GENDER", "total": false},
             "house": {"typeValue": "string", "pipe": "", "columnName": "HOUSE", "total": false},
@@ -18,7 +18,7 @@
             "hogwarts_student": {"typeValue": "check", "pipe": "", "columnName": "STUDENT", "total": false},
             "hogwarts_staff": {"typeValue": "check", "pipe": "", "columnName": "STAFF", "total": false},
             "actor": {"typeValue": "string", "pipe": "", "columnName": "ACTOR", "total": false},
-            "alternate_actors": {"typeValue": "string", "pipe": "", "columnName": "ALT ACTOR", "total": false},
+            "alternate_actors": {"typeValue": "list", "pipe": "", "columnName": "ALT ACTOR", "total": false},
             "alive": {"typeValue": "check", "pipe": "", "columnName": "ALIVE", "total": false},
             "image": {"typeValue": "img", "pipe": "", "columnName": "IMAGE", "total": false}
         }   

@@ -21,7 +21,8 @@ formato para json config
 - calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico.
 - (total de todos?, en pantalla? seleccionados?)
 - al exportar, algunos datos estan mal formateados: alt name,birth date(null), wand
-
+- al exportar, adaptar los formatos nuevos del json, como los de date, guiarse por celltype
+birth date cuando es null da error, ver format time para guiarse, 
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -248,6 +249,8 @@ export class TabCompComponent {
             //console.log("col: "+ this.nestedToString(config[0][key]) + "\n")
             if (config[0][key].total){ // si hay alguno con valor true
               let _total = 0;
+              let _count = 0; // contador para valores de cadena
+
               for (const item of data){ // Recorre todos los elementos de data
                 _total += item[key]; // Suma el valor correspondiente a la clave key de cada elemento
                 console.log(item[key]);
@@ -282,7 +285,7 @@ export class TabCompComponent {
 
     // Si no se encuentra el key, devuelve una cadena vacía
     if (!keyFound) {
-      return 'asdassa';
+      return 'no se encontro el valor key';
     }
 
     for (const col of this.configColumnas) {
@@ -394,6 +397,12 @@ export class TabCompComponent {
               return 'img';
             }
             else if (type.typeValue === 'nestedObject') {
+              if (type.pipe === 'default' || type.pipe === '') {
+                return 'nestedObject';
+              }
+              return 'nestedObject';
+            }
+            else if (type.typeValue === 'list') {
               if (type.pipe === 'default' || type.pipe === '') {
                 return 'nestedObject';
               }
@@ -781,6 +790,13 @@ export class TabCompComponent {
         else if (this.cellType(column) === 'datetime') {
           return this.formatDateTime(row[column]);
         }
+        else if (this.cellType(column) === 'nestedObject') {
+          return this.nestedToString(row[column]);
+        }
+        else if (this.cellType(column) === 'list') {
+          return this.nestedToString(row[column]);
+        }
+        
         else {
           return row[column];
         }
@@ -822,7 +838,8 @@ export class TabCompComponent {
       const _time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
       return _time;
     }
-    return 'error'
+    // EJEMPLO EDGE CASE QUE SEA VALOR NULL
+    return ''
 
   }
 
