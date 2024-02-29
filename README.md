@@ -16,9 +16,9 @@ los pipes para elementos sin pipes custom son “” (comillas vacias) o “defa
 Pipes Custom:
 - number: comma, percent, default, USD, GS 
     - comma (numero con separador de miles)
-    - - percent (porcentaje, se escribe como: ej. 0.4 = 40)
-    - - USD (representacion currency en dolares)
-    - - GS (representacion currency en PYG)
+    - percent (porcentaje, se escribe como: ej. 0.4 = 40)
+    - USD (representacion currency en dolares)
+    - GS (representacion currency en PYG)
 
 - date: time, datetime, date, y todos los locale de angular
     - date: represenado como “dd-MM-yyyy”
