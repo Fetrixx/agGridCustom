@@ -23,7 +23,7 @@ en proceso:
 - (total de todos?, en pantalla? seleccionados?)
 - formato para json config
   "config" ["id": {"total": true},] (funciona si el valor es numerico)
-
+- agregar usd o gs, verificando pipe ?
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -32,8 +32,12 @@ falta:
 
 
 
+-eventos, carga json rxjs
+
+
+
 */
-import { Component, ViewChild, AfterViewInit, HostListener, Input, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, HostListener, Input, ViewChildren, QueryList, ElementRef, EventEmitter, Output } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
 import * as XLSX from 'xlsx';
@@ -108,7 +112,10 @@ export class TabCompComponent {
   private lastSelectedRowIndex: number | null = null; // propiedad para manejar la última fila seleccionada con Shift+Click
   private preSortSelection: Set<any[]> = new Set<any[]>(); // propiedad para almacenar las filas seleccionadas antes de la clasificación
 
-  pageSizes: number[] = [10, 20, 50, 100];
+  @Input() pageSizes: number[] = [10, 20, 50, 100, 500];
+  @Input() pageSize: number = 20;
+
+  @Output() rowEvent: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, private datePipe: DatePipe, private decimalPipe: DecimalPipe) { }
 
@@ -162,6 +169,10 @@ export class TabCompComponent {
     this.lastSelectedRowIndex = this.dataSource.filteredData.indexOf(row);
     this.preSortSelection = new Set(this.selection.selected);
     this.updateSelectedRowCount()
+  }
+
+  dbClick(row: any[], e: MouseEvent) {
+    this.rowEvent.emit(row);
   }
 
   columnVisibility: { [key: string]: boolean } = {};
@@ -1021,7 +1032,15 @@ export class TabCompComponent {
   }
 
   ngOnInit() {
-    this.loadGridData_Ag();
+    switch (this.tipoTabla) {
+      case "tab_nativa":
+        break;
+      case "tab_aggrid":
+        this.loadGridData_Ag();
+        break;
+      default:
+        break;
+    }
   }
 
   loadGridData_Ag() {

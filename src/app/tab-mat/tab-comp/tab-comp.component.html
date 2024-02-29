@@ -296,7 +296,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></tr>
         <!--mat-header-row *matHeaderRowDef="displayedColumns; sticky:true" class="sticky-header"></mat-header-row-->
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto;" class="hover-effect"
-          [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)">
+          [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)" (dblclick)="dbClick(row, $event)">
 
         </tr>
         <!--mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
@@ -310,7 +310,7 @@
       <span style=" font-weight: bolder;"> &nbsp; Items Seleccionados: {{selectedRowCount}} </span>
 
       <span style=" font-weight: bolder;"> &nbsp; TOTALES: {{nestedToString(totalesFinal)}} </span>
-      <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons
+      <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizes" showFirstLastButtons
         (pageSizeChange)="pageSizeChange()"></mat-paginator>
 
     </div>
