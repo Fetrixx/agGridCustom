@@ -1,14 +1,14 @@
 ## Uso del Json:
 
 typeValue:
-    - string
-    - check
-    - number * 
-    - date *
-    - url
-    - img
-    - nestedObject
-    - list
+  - string
+  - check
+  - number * 
+  - date *
+  - url
+  - img
+  - nestedObject
+  - list
 
 Pipes:
 los pipes para elementos sin pipes custom son “” (comillas vacias) o “default” para no usar ningun pipe. * significa que este typeValue tienen pipes custom.
