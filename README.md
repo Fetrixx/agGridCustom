@@ -1,30 +1,30 @@
 ## Uso del Json:
 
 typeValue:
-    • string
-    • check
-    • number * 
-    • date *
-    • url
-    • img
-    • nestedObject
-    • list
+    - string
+    - check
+    - number * 
+    - date *
+    - url
+    - img
+    - nestedObject
+    - list
 
 Pipes:
 los pipes para elementos sin pipes custom son “” (comillas vacias) o “default” para no usar ningun pipe. * significa que este typeValue tienen pipes custom.
 
 Pipes Custom:
 - number: comma, percent, default, USD, GS 
-    • comma (numero con separador de miles)
-    • - percent (porcentaje, se escribe como: ej. 0.4 = 40)
-    • - USD (representacion currency en dolares)
-    • - GS (representacion currency en PYG)
+    - comma (numero con separador de miles)
+    - - percent (porcentaje, se escribe como: ej. 0.4 = 40)
+    - - USD (representacion currency en dolares)
+    - - GS (representacion currency en PYG)
 
 - date: time, datetime, date, y todos los locale de angular
-    • date: represenado como “dd-MM-yyyy”
-    • time: represenado como “hh:mm:ss a”
-    • datetime: represenado como “dd-MM-yyyy hh:mm:ss a”
-    • todos los datepipes standard de angular “DatePipe”: https://angular.io/api/common/DatePipe
+    - date: represenado como “dd-MM-yyyy”
+    - time: represenado como “hh:mm:ss a”
+    - datetime: represenado como “dd-MM-yyyy hh:mm:ss a”
+    - todos los datepipes standard de angular “DatePipe”: https://angular.io/api/common/DatePipe
 
 Si hay alguna configuracion incorrecta en el json, el elemento estara en italic bold.
 
@@ -35,9 +35,9 @@ correcto:
 	"numero_uno": 1
 }
 incorrecto: 
-    • "numeroUno": 1
-    • "NumeroUno": 1
-    • "Uno": 1
+    - "numeroUno": 1
+    - "NumeroUno": 1
+    - "Uno": 1
 
 
 # AppAgGrid
