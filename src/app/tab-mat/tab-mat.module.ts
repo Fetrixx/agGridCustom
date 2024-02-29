@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { TabCompComponent } from './tab-comp/tab-comp.component';
 
 import { HttpClientModule } from '@angular/common/http';
@@ -97,7 +97,8 @@ import {MatChipEditedEvent, MatChipInputEvent, MatChipsModule} from '@angular/ma
   ],
   exports: [
     TabCompComponent
-  ]
+  ],
+  providers: [DatePipe, DecimalPipe]
 })
 export class TabMatModule { }
 

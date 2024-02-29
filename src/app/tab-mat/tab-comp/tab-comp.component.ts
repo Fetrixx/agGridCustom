@@ -7,22 +7,23 @@ ya esta:
 * formatear "date" para mostrar y filtrar correctamente:
 * sticky header
 * chips para busqueda por columna 
-
-ya?:
+* al exportar, algunos datos estan mal formateados: alt name,birth date(null), wand
+* al exportar, adaptar los formatos nuevos del json, como los de date, guiarse por celltype
+birth date cuando es null da error, ver format time para guiarse, 
+* totales para valores numericos que sean true
 ? arreglar la seleccion con shift al aplicar un filtro
 ? arreglar sort al hacer el  filtro 
 ? todo lq tenga que ver con el nuevo filtro
 
+ya?:
+? flex correcto en tabla (ancho de cols) ? (cuando la tabla tiene muchas columnas, parece que no tiene flex)
 
 en proceso:
-- flex correcto en tabla (ancho de cols) ?
-formato para json config
-"config""id": {"total": true}, 
 - calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico.
 - (total de todos?, en pantalla? seleccionados?)
-- al exportar, algunos datos estan mal formateados: alt name,birth date(null), wand
-- al exportar, adaptar los formatos nuevos del json, como los de date, guiarse por celltype
-birth date cuando es null da error, ver format time para guiarse, 
+- formato para json config
+  "config" ["id": {"total": true},] (funciona si el valor es numerico)
+
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -48,6 +49,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { inject } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 
 interface ColumnConfig {
@@ -108,7 +110,7 @@ export class TabCompComponent {
 
   pageSizes: number[] = [10, 20, 50, 100];
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder) { }
+  constructor(private http: HttpClient, private formBuilder: FormBuilder, private datePipe: DatePipe, private decimalPipe: DecimalPipe) { }
 
   ngAfterViewInit() {
     this.loadTableDataSelector();
@@ -120,6 +122,7 @@ export class TabCompComponent {
         this.adjustSelectionAfterSort();
       });
     }
+    this.calcularTotal()
 
   }
 
@@ -209,74 +212,103 @@ export class TabCompComponent {
   totalesCols: any[] = [];
 
 
-  cargarTotales(){
-    if (this.totalesCols.length === 0){
+  cargarTotales() {
+    if (this.totalesCols.length === 0) {
       this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
-      .subscribe(response => { // acceder a .data del item "data" del json
-        const config = response.config;
-        const data = response.data;
-        for (const col of this.configColumnas){
-          for (const key in col){
-            this.totalesCols.push({ name: config[0][key].columnName + " total", total: 0 });
+        .subscribe(response => { // acceder a .data del item "data" del json
+          const config = response.config;
+          const data = response.data;
+          for (const col of this.configColumnas) {
+            for (const key in col) {
+              this.totalesCols.push({ name: config[0][key].columnName, total: 0 });
+            }
           }
-        }
-        console.log("CREADO ARRAY TOTALES")
-        console.log(this.totalesCols)
-      });
+          //console.log("CREADO ARRAY TOTALES")
+          //console.log(this.totalesCols)
+        });
     }
-    console.log("ARRAY EXISTENTES TOTALES")
-    console.log(this.totalesCols)
+    //console.log("ARRAY EXISTENTES TOTALES")
+    //console.log(this.totalesCols)
   }
 
   calcularTotal() {
-    if (this.totalesCols.length === 0){
+    if (this.totalesCols.length === 0) {
       this.cargarTotales();
     }
 
-    
-    
     this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
       .subscribe(response => { // acceder a .data del item "data" del json
         const config = response.config;
         const data = response.data;
-        //console.log("config: "+ this.nestedToString(config.))
 
-        //console.log("config columnas: "+ this.nestedToString( this.configColumnas))
-
-
-        for (const col of this.configColumnas){
-          for (const key in col){
-            //console.log("col: "+ this.nestedToString(config[0][key]) + "\n")
-            if (config[0][key].total){ // si hay alguno con valor true
+        for (const col of this.configColumnas) {
+          for (const key in col) {
+            if (config[0][key].total) { // si hay alguno con valor true
               let _total = 0;
-              let _count = 0; // contador para valores de cadena
 
-              for (const item of data){ // Recorre todos los elementos de data
-                _total += item[key]; // Suma el valor correspondiente a la clave key de cada elemento
-                console.log(item[key]);
+              for (const item of data) { // Recorre todos los elementos de data
+                if (item[key] !== "" && item[key] !== null) {
+                  _total += item[key]; // Suma el valor correspondiente a la clave key de cada elemento
+                }
               }
               //_total += data[0][key]; //tomar valor
               // AGREGAR EL KEY QUE ES TRUE A UNA LISTA, Y SACAR SU TOTAL, EJEMPLO "YEAR": {"total": true}, "YEAR": 
               //this.totalesCols.findIndex(total => total.name === config[0][key].columnName + " total")  
-              const existingTotalIndex = this.totalesCols.findIndex(total => total.name === config[0][key].columnName + " total");
+              const existingTotalIndex = this.totalesCols.findIndex(total => total.name === config[0][key].columnName);
               if (existingTotalIndex !== -1) {
                 this.totalesCols[existingTotalIndex].total += _total;
               } else {
-                this.totalesCols.push({ name: config[0][key].columnName + " total", total: _total });
+                this.totalesCols.push({ name: config[0][key].columnName, total: _total });
               }
 
               //console.log(config[0][key]); // objeto de config
               //console.log(data[0][key]); // tomar el valor de data y agregarlo a una lista "totales"
               //this.totalesCols
             }
-            
+
             //this.totalesCols.push({ name: config[0][key].columnName + " total", total: _total });
           }
         }
-        console.log("TOTALES AHORA: ")
-        console.log(this.totalesCols)
+
+        /*for (const col of this.totalesCols) {
+          for (const key in col) {
+            //console.log("key: "+ key)
+            //console.log("col[key]: " + col[key] + "type: " + typeof(col[key]));
+            if (typeof (col[key]) === "number" && col[key] > "0") { // si en totalesCols, en el key "totales", hay un valor dif a 0
+              console.log("valor: " + col[key])
+              let colName: string = "";
+              const valor = col[key];
+              for (const col of this.configColumnas) {
+                for (const key in col) {
+                  if (config[0][key].total) { // si hay alguno con valor true
+                    colName = config[0][key].columnName;
+                  }
+                }
+              }
+
+              this.totalesFinal.push(colName + ": " + valor + "");
+            }
+          }
+        }*/
+
+        for (const total of this.totalesCols) {
+          if (typeof total.total === "number" && total.total !== 0) {
+            //this.totalesFinal.push(`${total.name}: ${total.total}`);
+            const formattedValue = this.decimalPipe.transform(total.total,'1.0')
+            
+            this.totalesFinal.push(total.name + ": " + formattedValue);
+
+            //const formattedDate = this.datePipe.transform(row[column], 'date');
+            
+          }
+        }
+
+
+        //console.log(this.totalesFinal);
       });
   }
+
+  totalesFinal: any[] = []
 
   cellType(colId: string): string {
     // Encuentra el key correspondiente al columnName
@@ -780,23 +812,116 @@ export class TabCompComponent {
     // Agregar datos de las filas seleccionadas
     rowsToExport.forEach(row => {
       const rowData = visibleColumns.map(column => {
+        //const formattedDate = this.datePipe.transform(row[column], 'date');
+        //const formattedDate = this.datePipe.transform(FECHA.DATE, 'dd/MM/yyyy');
+
         // Si la celda es de tipo fecha, hora o fecha y hora, formatearla como texto
         if (this.cellType(column) === 'date') {
-          return this.formatDate(row[column]);
+          if (row[column] !== null) { // custom
+            //return this.datePipe.transform(row[column], 'date'); // es custom, no es datepipe
+            return this.formatDate(row[column]);
+          }
+          return ""
         }
-        else if (this.cellType(column) === 'time') {
-          return this.formatTime(row[column]);
+        else if (this.cellType(column) === 'time') { // custom
+          if (row[column] !== null) { // custom
+            return this.formatTime(row[column]);
+          }
+          return ""
         }
-        else if (this.cellType(column) === 'datetime') {
-          return this.formatDateTime(row[column]);
+        else if (this.cellType(column) === 'datetime') {  // custom
+          //return this.datePipe.transform(row[column], 'datetime');
+          if (row[column] !== null) { // custom
+            return this.formatDateTime(row[column]);
+          }
+          return ""
         }
+        else if (this.cellType(column) === 'short') { // datepipe 
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'short');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'medium') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'medium');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'long') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'long');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'full') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'full');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'shortDate') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'shortDate');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'mediumDate') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'mediumDate');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'longDate') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'longDate');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'fullDate') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'fullDate');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'shortTime') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'shortTime');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'mediumTime') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'mediumTime');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'longTime') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'longTime');
+          }
+          return ""
+        }
+        else if (this.cellType(column) === 'fullTime') {
+          if (row[column] !== null) {
+            return this.datePipe.transform(row[column], 'fullTime');
+          }
+          return ""
+        }
+
         else if (this.cellType(column) === 'nestedObject') {
-          return this.nestedToString(row[column]);
+          if (row[column] !== null) {
+            return this.nestedToString(row[column]);
+          }
+          return ""
         }
         else if (this.cellType(column) === 'list') {
-          return this.nestedToString(row[column]);
+          if (row[column] !== null) {
+            return this.nestedToString(row[column]);
+          }
+          return ""
         }
-        
+
         else {
           return row[column];
         }

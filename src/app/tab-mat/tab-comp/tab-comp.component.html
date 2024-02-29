@@ -1,65 +1,6 @@
-<!--mat-chip-grid #chipGrid aria-label="Enter fruits">
-  @for (busq of busqueda; track busq) {
-    <mat-chip-row
-      (removed)="remove(busq)"
-      [editable]="true"
-      (edited)="edit(busq, $event)"
-      [aria-description]="'press enter to edit ' + busq.name">
-      {{busq.name}}
-      <button matChipRemove [attr.aria-label]="'remove ' + busq.name">
-        <mat-icon>cancel</mat-icon>
-      </button>
-    </mat-chip-row>
-  }
-  <input placeholder="New fruit..."
-         [matChipInputFor]="chipGrid"
-         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-         [matChipInputAddOnBlur]="addOnBlur"
-         (matChipInputTokenEnd)="add($event)"/>
-</mat-chip-grid-->
-
-<!--mat-chip-listbox aria-label="Fish selection">
-  <mat-chip-option>One fish</mat-chip-option>
-  <mat-chip-option>Two fish</mat-chip-option>
-  <mat-chip-option color="accent" selected>Accent fish</mat-chip-option>
-  <mat-chip-option color="warn">Warn fish</mat-chip-option>
-</mat-chip-listbox-->
-
 <!--
-<p>
-  fecha 1: date
-  {{"2024-02-14T00:00:00-03:00" | datesCustom: "date"}}
-</p>
 
 
-
-<p>
-  fecha 2: datetime
-  {{"2024-02-22T11:37:06.8708246-03:00" | datesCustom: "datetime"}}
-</p>
-
-<p>
-  fecha 3: time
-  {{"2024-02-22T11:37:06.8708246-03:00" | datesCustom: "time"}}
-</p>
--->
-<!-- test fechas 
-<div> 
-  <p>
-    -> "2024-02-22T11:37:06.8708246-03:00" <- timezone para hora correcta </p>
-      <p>
-        date:
-        {{"2024-02-22T11:37:06.8708246-03:00" | date: 'dd-MM-yyyy'}}
-      </p>
-      <p>
-        time:
-        {{"2024-02-22T11:37:06.8708246-03:00" | date: 'hh:mm:ss a'}}
-      </p>
-      <p>
-        datetime:
-        {{"2024-02-22T11:37:06.8708246-03:00" | date: "dd-MM-yyyy hh:mm:ss a"}}
-      </p>
-</div>
 -->
 
 <!-- Tabla nativa -->
@@ -94,7 +35,7 @@
       </button>
 
 
-      <button mat-raised-button
+      <!--button mat-raised-button
         color="primary" (click)="cargarTotales();">
         <mat-icon fontIcon="compare_arrows"></mat-icon>
         <span>CARGAR TOTAL</span>
@@ -104,7 +45,7 @@
         color="primary" (click)="calcularTotal();">
         <mat-icon fontIcon="compare_arrows"></mat-icon>
         <span>CALCULAR TOTAL</span>
-      </button>
+      </button-->
       
       <mat-menu #columnas="matMenu"> <!-- opciones de "mostrar columnas" -->
         <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
@@ -191,9 +132,16 @@
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'checkbox'">
-              <ng-container *ngIf="element[col] !== ''">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
                 <mat-checkbox [disabled]="true" [checked]="element[col]" style="display:flex; text-align: center;
                 justify-content: center;"></mat-checkbox>
+              </ng-container>
+            </ng-container>
+
+
+            <ng-container *ngIf="cellType(col) === 'nestedObject'">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{nestedToString(element[col])}}
               </ng-container>
               <ng-container *ngIf="element[col] === ''">
                 <!-- no data -->
@@ -201,16 +149,13 @@
 
             </ng-container>
 
-
-            <ng-container *ngIf="cellType(col) === 'nestedObject'">
-              {{nestedToString(element[col])}}
-            </ng-container>
+            
 
             
 
 
             <ng-container *ngIf="cellType(col) === 'img'">
-              <ng-container *ngIf="element[col] !== ''">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
                 <img [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 80%;  
                 display: block; margin-left: auto; margin-right: auto; ">
               </ng-container>
@@ -220,7 +165,7 @@
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'url'">
-              <ng-container *ngIf="element[col] !== ''">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
                 <!-- si tiene url-->
                 <a target="_blank" href="{{element[col]}}">{{element[col]}}</a>
               </ng-container>
@@ -230,77 +175,116 @@
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'number'">
-              {{element[col]}} <!-- por default muestra sus decimales.-->
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{element[col]}} <!-- por default muestra sus decimales.-->
+              </ng-container>
+              
             </ng-container>
-            <ng-container *ngIf="cellType(col) === 'number_miles'">
-              {{element[col] | number:'1.0'}} <!-- , en miles + todos sus decimales -->
+            <ng-container *ngIf="cellType(col) === 'number_miles'"> <!-- comma -->
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{element[col] | number:'1.0'}} <!-- , en miles + todos sus decimales -->
               <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'percent'">
-              {{element[col] | percent}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{element[col] | percent}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'USD'">
-              {{element[col] | currency: 'USD'}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{element[col] | currency: 'USD'}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'GS'">
-              {{element[col] | currency: 'PYG'}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{element[col] | currency: 'PYG'}}
+              </ng-container>
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'date'">
               <!--{{formatDate(element[col])}}-->
               <!--{{(element[col]) | datesCustom: "date"}}-->
-              {{(element[col]) | date: 'dd-MM-yyyy'}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: 'dd-MM-yyyy'}}
+              </ng-container>
             </ng-container>
 
             <ng-container *ngIf="cellType(col) === 'time'">
               <!--{{(element[col]) | datesCustom: "time"}}-->
-              {{(element[col]) | date: "hh:mm:ss a"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "hh:mm:ss a"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'datetime'">
               <!--{{(element[col]) | datesCustom: "datetime"}}-->
-              {{(element[col]) | date: "dd-MM-yyyy hh:mm:ss a"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "dd-MM-yyyy hh:mm:ss a"}}
+              </ng-container>
             </ng-container>
-
 
             <ng-container *ngIf="cellType(col) === 'short'"> <!-- DATE PIPES -->
-              {{(element[col]) | date: "short"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "short"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'medium'">
-              {{(element[col]) | date: "medium"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "medium"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'long'">
-              {{(element[col]) | date: "long"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "long"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'full'">
-              {{(element[col]) | date: "full"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "full"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'shortDate'">
-              {{(element[col]) | date: "shortDate"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "shortDate"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'mediumDate'">
-              {{(element[col]) | date: "mediumDate"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "mediumDate"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'longDate'">
-              {{(element[col]) | date: "longDate"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "longDate"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'fullDate'">
-              {{(element[col]) | date: "fullDate"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "fullDate"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'shortTime'">
-              {{(element[col]) | date: "shortTime"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "shortTime"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'mediumTime'">
-              {{(element[col]) | date: "mediumTime"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "mediumTime"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'longTime'">
-              {{(element[col]) | date: "longTime"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "longTime"}}
+              </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'fullTime'">
-              {{(element[col]) | date: "fullTime"}}
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                {{(element[col]) | date: "fullTime"}}
+              </ng-container>
             </ng-container>
 
-
-            <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json -->
+            <ng-container *ngIf="cellType(col) === ''"> <!-- en caso de no agregar un tipo en el json  (typeValue)-->
               <span style="background-color:rgba(202, 202, 202, 0.25); font-style: italic; font-weight: bolder;">
                 {{element[col]}}
               </span>
@@ -323,7 +307,9 @@
 
 
     <div class="footer">
-      <span style="font-weight: bolder;"> &nbsp; Items Seleccionados: {{selectedRowCount}} </span>
+      <span style=" font-weight: bolder;"> &nbsp; Items Seleccionados: {{selectedRowCount}} </span>
+
+      <span style=" font-weight: bolder;"> &nbsp; TOTALES: {{nestedToString(totalesFinal)}} </span>
       <mat-paginator #paginator [pageSizeOptions]="pageSizes" showFirstLastButtons
         (pageSizeChange)="pageSizeChange()"></mat-paginator>
 

@@ -1,0 +1,49 @@
+{
+    "config": [
+        
+        {
+            "u": {"typeValue": "number", "pipe": "comma", "columnName": "calculo1", "total": true},
+            "d": {"typeValue": "number", "pipe": "comma", "columnName": "calculo2", "total": true},
+            "teststr": {"typeValue": "string", "pipe": "", "columnName": "str test", "total": false},
+            "fecha": {"typeValue": "date", "pipe": "full", "columnName": "test fecha", "total": false},
+            "checktest": {"typeValue": "check", "pipe": "", "columnName": "test check", "total": false}
+        }   
+    ],
+    "data": [
+        {
+            "u": 1,
+            "d": 10000,
+            "teststr": "test",
+            "fecha": "2024-02-22T11:37:06.8708246-03:00",
+            "checktest": true
+        },
+        {
+            "u": 1,
+            "d": 10000,
+            "teststr": "test",
+            "fecha": "",
+            "checktest": false
+        },
+        {
+            "u": 1,
+            "d": 10000,
+            "teststr": "test",
+            "fecha": "",
+            "checktest": true
+        },
+        {
+            "u": 1,
+            "d": 10000,
+            "teststr": "test",
+            "fecha": "",
+            "checktest": true
+        },
+        {
+            "u": 1,
+            "d": 10000,
+            "teststr": "test",
+            "fecha": "",
+            "checktest": null
+        }
+    ]
+}
