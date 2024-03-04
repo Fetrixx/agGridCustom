@@ -15,8 +15,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 
-
-
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -24,8 +22,6 @@ import { MatSortModule } from '@angular/material/sort';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
-
-
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -35,9 +31,6 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-
-
-
 import { AgGridAngular } from 'ag-grid-angular';
 import { AgGridModule } from 'ag-grid-angular';
 
@@ -46,6 +39,61 @@ import { DatesCustomPipe } from '../pipes/dates-custom.pipe';
 
 import {MatChipEditedEvent, MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
 
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es'
+
+registerLocaleData(localeEs);
+
+
+/*
+export class CustomPaginatorIntl extends MatPaginatorIntl {
+  override itemsPerPageLabel = 'Items por Pagina:';
+  override nextPageLabel = 'Siguiente';
+  override previousPageLabel = 'Anterior';
+  override firstPageLabel = "Primera Pagina";
+  override lastPageLabel = "Ultima Pagina";
+
+
+
+  // Customize other labels as needed based on locale
+}*/
+/*
+export function CustomPaginator() {
+  const customPaginatorIntl = new MatPaginatorIntl();
+
+  //customPaginatorIntl.itemsPerPageLabel = 'rows per page';
+  customPaginatorIntl.itemsPerPageLabel = 'Items por Pagina:';
+  customPaginatorIntl.nextPageLabel = 'Siguiente';
+  customPaginatorIntl.previousPageLabel = 'Anterior';
+  customPaginatorIntl.firstPageLabel = "Primera Pagina";
+  customPaginatorIntl.lastPageLabel = "Ultima Pagina";
+
+  return customPaginatorIntl;
+}
+
+*/
+
+import { MatPaginatorIntl } from '@angular/material/paginator';
+
+export function CustomPaginator() {
+  const customPaginatorIntl = new MatPaginatorIntl();
+  
+  customPaginatorIntl.itemsPerPageLabel = 'Items por Pagina:';
+  customPaginatorIntl.nextPageLabel = 'Siguiente';
+  customPaginatorIntl.previousPageLabel = 'Anterior';
+  customPaginatorIntl.firstPageLabel = "Primera Pagina";
+  customPaginatorIntl.lastPageLabel = "Ultima Pagina";
+  /*
+  customPaginatorIntl.itemsPerPageLabel = 'Ítems por Página:';
+  customPaginatorIntl.nextPageLabel = 'Siguiente';
+  customPaginatorIntl.previousPageLabel = 'Anterior';
+  customPaginatorIntl.firstPageLabel = "Primera Página";
+  customPaginatorIntl.lastPageLabel = "Última Página";
+  */
+
+  return customPaginatorIntl;
+}
 
 @NgModule({
   declarations: [
@@ -98,7 +146,13 @@ import {MatChipEditedEvent, MatChipInputEvent, MatChipsModule} from '@angular/ma
   exports: [
     TabCompComponent
   ],
-  providers: [DatePipe, DecimalPipe]
+  providers: [
+    DatePipe,
+    DecimalPipe,
+    {provide: LOCALE_ID, useValue: 'es'},
+    //{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl } // Optionally, provide a custom paginator labels based on locale
+    { provide: MatPaginatorIntl, useValue: CustomPaginator() }
+]
 })
 export class TabMatModule { }
 

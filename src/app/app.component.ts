@@ -9,16 +9,17 @@ export class AppComponent {
   title = 'app-AgGrid';
   jsonData = "";
 
-  getData() {
+  getData(e: any) {
     /**
      * jsonData HttpClient
      * jsonData = {}
-     * 
      */
+    console.log("Test: \"getTest\"" +  e);
+
   }
 
-  deleteTest(e: any) {
-    console.log(e);
+  deleteTest(e: any) { // e = row
+    console.log("Test: \"deleteTest\"" +  e);
 
     // ABRE POp up de confirmacion
     // SI, elimina
@@ -28,8 +29,8 @@ export class AppComponent {
     // jsonData
   }
 
-  editTest() {
-
+  editTest(e: any) { // e = row
+    console.log("Test: \"editTest\"" +  e);
     /**
      * OK
      * jsonData se actualiza

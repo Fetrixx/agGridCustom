@@ -31,6 +31,10 @@ falta:
 
 
 
+eliminar los "format" que no se usen
+- agregar inputs en las casillas al hacer hover en campos
+
+
 
 -eventos, carga json rxjs
 
@@ -78,6 +82,8 @@ export class TabCompComponent {
   @Input() jsonLink: string = '';
   @Input() tipoTabla: string = '';
 
+  isHidden= false;
+  showInput= false;
 
   displayedColumns: string[] = [];
   originalColumns: string[] = [];
@@ -112,8 +118,8 @@ export class TabCompComponent {
   private lastSelectedRowIndex: number | null = null; // propiedad para manejar la última fila seleccionada con Shift+Click
   private preSortSelection: Set<any[]> = new Set<any[]>(); // propiedad para almacenar las filas seleccionadas antes de la clasificación
 
-  @Input() pageSizes: number[] = [10, 20, 50, 100, 500];
-  @Input() pageSize: number = 20;
+  @Input() pageSizes: number[] = [10, 20, 50, 100, 500]; // <- valor predefinido, en caso de no ser especificado
+  @Input() pageSize: number = 20; // <- valor predefinido, en caso de no ser especificado
 
   @Output() rowEvent: EventEmitter<any> = new EventEmitter<any>();
 
@@ -172,13 +178,14 @@ export class TabCompComponent {
   }
 
   dbClick(row: any[], e: MouseEvent) {
-    this.rowEvent.emit(row);
+    this.rowEvent.emit("\nROW: \n" + this.nestedToString(row));
   }
 
   columnVisibility: { [key: string]: boolean } = {};
 
   columnsFormGroup!: FormGroup;
 
+  /*
   formatColumnName(columnName: string): string {
     // Reemplazar guiones bajos con espacios
     let formattedName = columnName.replace(/_/g, ' ');
@@ -191,6 +198,7 @@ export class TabCompComponent {
 
     return formattedName;
   }
+  */
 
 
   configColumnas: any[] = [];
@@ -479,8 +487,6 @@ export class TabCompComponent {
 
   columnNameJson(colId: string): string {
     const normalizedColId = colId.replace(/ /g, '').toLowerCase();
-
-
     for (const col of this.configColumnas) {
       // Itera sobre las propiedades del objeto de configuración de columna
       for (const key in col) {
@@ -523,7 +529,7 @@ export class TabCompComponent {
     this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
       .subscribe(response => { // acceder a .data del item "data" del json
         if (response.data.length > 0) {
-          // Función para eliminar caracteres no deseados de objetos anidados
+          // Función para formatear objetos anidados, listas a strings.
           const removeBrackets = (value: any) => {
             if (typeof value === 'object' && value !== null) {
               return JSON.stringify(value)
@@ -538,7 +544,7 @@ export class TabCompComponent {
           const modifiedData = response.data.map(item => {                    // acceder a .data del item "data" del json
             const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
-              modifiedItem[this.formatColumnName(key)] = removeBrackets(item[key]);
+              modifiedItem[key] = removeBrackets(item[key]);
             }
             return modifiedItem;
           });

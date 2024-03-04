@@ -3,6 +3,18 @@
 
 -->
 
+
+<button (mouseenter)="isHidden = !isHidden" (mouseleave)="isHidden = !isHidden">hover here</button>
+<input [placeholder]="'texto123'" (mouseenter)="isHidden = !isHidden" (mouseleave)="isHidden = !isHidden">
+<input [value]="'texto123'">
+
+<ng-container *ngIf="isHidden">
+  <div>
+    <br>
+    this container will show on button hover
+  </div>
+</ng-container>
+
 <!-- Tabla nativa -->
 <div *ngIf="tipoTabla === 'tab_nativa'"
   style="user-select: none; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100vw; height: 100vh; ">
@@ -46,7 +58,7 @@
         <mat-icon fontIcon="compare_arrows"></mat-icon>
         <span>CALCULAR TOTAL</span>
       </button-->
-      
+
       <mat-menu #columnas="matMenu"> <!-- opciones de "mostrar columnas" -->
         <button mat-menu-item *ngFor="let column of hiddenColumns" (click)="showColumn(column)">
           <span> {{ column }} </span>
@@ -149,9 +161,9 @@
 
             </ng-container>
 
-            
 
-            
+
+
 
 
             <ng-container *ngIf="cellType(col) === 'img'">
@@ -176,14 +188,23 @@
 
             <ng-container *ngIf="cellType(col) === 'number'">
               <ng-container *ngIf="element[col] !== '' && element[col] !== null">
-                {{element[col]}} <!-- por default muestra sus decimales.-->
+
+                <span *ngIf="showInput === false" (mouseenter)="showInput = !showInput">
+                  {{element[col]}} <!-- por default muestra sus decimales.-->
+                  
+                </span>
+                <ng-container *ngIf="showInput">
+                  <input [value]="element[col]" (mouseleave)="showInput = !showInput">
+                </ng-container>
+
+                
               </ng-container>
-              
+
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'number_miles'"> <!-- comma -->
               <ng-container *ngIf="element[col] !== '' && element[col] !== null">
                 {{element[col] | number:'1.0'}} <!-- , en miles + todos sus decimales -->
-              <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
+                <!-- | number:'1.0-0' significa, .0 es separador de miles, y -0 es ningun decimal-->
               </ng-container>
             </ng-container>
             <ng-container *ngIf="cellType(col) === 'percent'">
@@ -296,7 +317,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></tr>
         <!--mat-header-row *matHeaderRowDef="displayedColumns; sticky:true" class="sticky-header"></mat-header-row-->
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto;" class="hover-effect"
-          [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)" (dblclick)="dbClick(row, $event)">
+          [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"
+          (dblclick)="dbClick(row, $event)">
 
         </tr>
         <!--mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
