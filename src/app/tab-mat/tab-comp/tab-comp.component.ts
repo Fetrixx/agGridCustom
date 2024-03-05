@@ -14,32 +14,28 @@ birth date cuando es null da error, ver format time para guiarse,
 ? arreglar la seleccion con shift al aplicar un filtro
 ? arreglar sort al hacer el  filtro 
 ? todo lq tenga que ver con el nuevo filtro
+* debounceTime al buscar (agregar un delay al hacer las busquedas para no hacer muchas llamadas.) RXJS
 
 ya?:
 ? flex correcto en tabla (ancho de cols) ? (cuando la tabla tiene muchas columnas, parece que no tiene flex)
 
 en proceso:
-- calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico.
-- (total de todos?, en pantalla? seleccionados?)
-- formato para json config
-  "config" ["id": {"total": true},] (funciona si el valor es numerico)
-- agregar usd o gs, verificando pipe ? al  total.
+- calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico. (solucion: asignar bien los datos del json)
+- (total de todos?, en pantalla? seleccionados?) (solucion: total de todos los elementos.)
+- formato para json config "config" ["id": {"total": true},] (funciona si el valor es numerico) (ya esta)
+- agregar usd o gs, verificando pipe ? al  total. (?)
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
 - pivot (?)
 
+eliminar los "format" que no se usen ?
 
-
-eliminar los "format" que no se usen
-- agregar inputs en las casillas al hacer hover en campos
-
-
-consumo json?:
+ (  como modificar sin backend?  )
+- agregar inputs en las casillas al hacer hover en campos 
+consumo json?: 
 // https://medium.com/@ingenieromaciasgil/consumiendo-un-archivo-json-en-angular-d88fea1995ec
 
-
-agregar un delay al hacer las busquedas para no hacer muchas llamadas.
 
 -eventos, carga json rxjs
 
@@ -77,6 +73,10 @@ import {
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 
+import { debounceTime } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+
+
 interface ColumnConfig {
   [key: string]: {
     typeValue: string;
@@ -95,6 +95,8 @@ interface ColumnConfig {
 
 //implements AfterViewInit
 export class TabCompComponent {
+
+  private searchSubject = new Subject<string>();
 
   @Input() jsonLink: string = '';
   @Input() tipoTabla: string = '';
@@ -150,18 +152,27 @@ export class TabCompComponent {
   @Output() rowEvent: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private http: HttpClient, private formBuilder: FormBuilder, private datePipe: DatePipe, private decimalPipe: DecimalPipe,
-    private jsonService:JsonPaginaService, public dialog: MatDialog, private _snackBar: MatSnackBar) { }
+    private jsonService:JsonPaginaService, public dialog: MatDialog, private _snackBar: MatSnackBar) {
+      this.searchSubject.pipe(debounceTime(800)).subscribe((value: string) => {
+        this.applyAllFilters();
+        //console.log("BUSCANDO AHORA....")
+      });
+     }
     
     
-  openSnackBar(message: string, action:string) {
+  openSnackBar(message: string, action:string, duracion:number = 2000) {
     this._snackBar.open(message, action,{
-      duration: 2000,
+      duration: duracion,
       verticalPosition: 'top'
     })
   }
 
   popUP(){
     this.openSnackBar("mensaje123","accion123")
+  }
+
+  mensajePopUp(mensaje:string, accion:string){
+    this.openSnackBar(mensaje,accion)
   }
 
   snackBarGuardado(){
@@ -585,6 +596,8 @@ export class TabCompComponent {
   }
 
   refresh() {
+    //this.openSnackBar("Refrescando Tabla","",5);
+    //this.mensajePopUp("Refrescando Tabla","");
       this.hiddenColumns = [];
       // Limpiar los filtros
       this.filters = {};
@@ -603,6 +616,7 @@ export class TabCompComponent {
       /*
       this.loadTableDataSelector();
       */
+     console.log("Boton Refresh")
     
     
 
@@ -729,6 +743,7 @@ export class TabCompComponent {
       unselectedRows.forEach(row => this.selection.select(row));
     }
     this.updateSelectedRowCount()
+    console.log("Boton Seleccion Inversa")
   }
 
   deselectAllRows() {
@@ -750,7 +765,9 @@ export class TabCompComponent {
   applyFilter(event: Event, columnName: string) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.filters[columnName] = filterValue;
-    this.applyAllFilters();
+    //this.applyAllFilters();
+    this.searchSubject.next(filterValue); // Emitir el valor para la búsqueda después de un cierto tiempo
+
   }
 
   busqueda: string = "";
@@ -884,6 +901,7 @@ export class TabCompComponent {
   }
 
   excelExport() {
+    //this.mensajePopUp("Exportando...","");
     const now = new Date();
     const day = now.getDate().toString().padStart(2, '0');
     const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Los meses comienzan desde 0

@@ -1,3 +1,48 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class JsonPaginaService {
+
+  constructor(private http: HttpClient) { }
+
+  getJsonData(jsonLink: string): Observable<any> {
+    return this.http.get<any>(jsonLink);
+  }
+
+  getConfigData(jsonLink: string): Observable<any[]> {
+    return this.http.get<any>(jsonLink).pipe(
+      map(data => {
+        if (data && data.config && data.config.length > 0) {
+          return data.config;
+        }
+        return [];
+      })
+    );
+  }
+
+  getDataData(jsonLink: string): Observable<any[]> {
+    return this.http.get<any>(jsonLink).pipe(
+      map(data => {
+        if (data && data.data && data.data.length > 0) {
+          return data.data;
+        }
+        return [];
+      })
+    );
+  }
+  
+}
+
+
+
+/*
+
+
 import { Injectable,Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -20,7 +65,7 @@ export class JsonPaginaService {
       this.cargada = true;
       console.log(this.info);
       console.log((this.info));
-    })*/
+    })
   }
 
   getJsonData(jsonLink: string): Observable<any>{
@@ -48,7 +93,8 @@ export class JsonPaginaService {
   }
 
   /*
-  loadConfigData() {
+  /*
+  * loadConfigData() {
     //this.http.get<{ config: ColumnConfig[] }>(this.jsonLink) // get "config" de type any[] dentro del json
     this.jsonService.getJsonData(this.jsonLink)
       .subscribe(data => {
@@ -59,5 +105,7 @@ export class JsonPaginaService {
       });
 
   }
-  */
+  
 }
+
+*/
