@@ -23,7 +23,7 @@ en proceso:
 - (total de todos?, en pantalla? seleccionados?)
 - formato para json config
   "config" ["id": {"total": true},] (funciona si el valor es numerico)
-- agregar usd o gs, verificando pipe ?
+- agregar usd o gs, verificando pipe ? al  total.
 
 falta: 
 - multi sort (ngx-mat-multi-sort ?)
@@ -35,6 +35,11 @@ eliminar los "format" que no se usen
 - agregar inputs en las casillas al hacer hover en campos
 
 
+consumo json?:
+// https://medium.com/@ingenieromaciasgil/consumiendo-un-archivo-json-en-angular-d88fea1995ec
+
+
+agregar un delay al hacer las busquedas para no hacer muchas llamadas.
 
 -eventos, carga json rxjs
 
@@ -58,6 +63,18 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { inject } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
+
+import { JsonPaginaService } from '../../service/json-pagina.service';
+import {
+  MatDialog,
+  MatDialogRef,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogTitle,
+  MatDialogContent,
+} from '@angular/material/dialog';
+
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 interface ColumnConfig {
@@ -84,6 +101,15 @@ export class TabCompComponent {
 
   isHidden= false;
   showInput= false;
+
+  hoveredCell = false;
+  hoveredRow: any = null;
+  hoveredColumn: string = '';
+
+  disabledCell = true;
+  disable(){
+    this.disabledCell = !this.disabledCell;
+  }
 
   displayedColumns: string[] = [];
   originalColumns: string[] = [];
@@ -123,7 +149,39 @@ export class TabCompComponent {
 
   @Output() rowEvent: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private http: HttpClient, private formBuilder: FormBuilder, private datePipe: DatePipe, private decimalPipe: DecimalPipe) { }
+  constructor(private http: HttpClient, private formBuilder: FormBuilder, private datePipe: DatePipe, private decimalPipe: DecimalPipe,
+    private jsonService:JsonPaginaService, public dialog: MatDialog, private _snackBar: MatSnackBar) { }
+    
+    
+  openSnackBar(message: string, action:string) {
+    this._snackBar.open(message, action,{
+      duration: 2000,
+      verticalPosition: 'top'
+    })
+  }
+
+  popUP(){
+    this.openSnackBar("mensaje123","accion123")
+  }
+
+  snackBarGuardado(){
+    this.openSnackBar("Se ha guardado con exito","accion123")
+  }
+
+  ngOnInit() {
+    switch (this.tipoTabla) {
+      case "tab_nativa":
+        console.log("cargando tabla nativa")
+        break;
+      case "tab_aggrid":
+        this.loadGridData_Ag();
+        console.log("cargando tabla Ag Grid")
+        break;
+      default:
+        break;
+    }
+  }
+  
 
   ngAfterViewInit() {
     this.loadTableDataSelector();
@@ -139,7 +197,19 @@ export class TabCompComponent {
 
   }
 
-
+  
+  log(e: any){
+    console.log("LOG DAAATA...")
+    console.log(e);
+  }
+  /*
+  openDialog(enterAnimationDuration: string, exitAnimationDuration: string): void {
+    this.dialog.open(dialogabc, {
+      width: '250px',
+      enterAnimationDuration,
+      exitAnimationDuration,
+    });
+  }*/
 
   @HostListener('document:keydown.escape', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -181,6 +251,8 @@ export class TabCompComponent {
     this.rowEvent.emit("\nROW: \n" + this.nestedToString(row));
   }
 
+
+
   columnVisibility: { [key: string]: boolean } = {};
 
   columnsFormGroup!: FormGroup;
@@ -202,8 +274,10 @@ export class TabCompComponent {
 
 
   configColumnas: any[] = [];
+
   loadConfigData() {
-    this.http.get<{ config: ColumnConfig[] }>(this.jsonLink) // get "config" de type any[] dentro del json
+    //this.http.get<{ config: ColumnConfig[] }>(this.jsonLink) // get "config" de type any[] dentro del json
+    this.jsonService.getJsonData(this.jsonLink)
       .subscribe(data => {
         if (data && data.config && data.config.length > 0) {
           const configData = data.config;
@@ -233,7 +307,8 @@ export class TabCompComponent {
 
   cargarTotales() {
     if (this.totalesCols.length === 0) {
-      this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+      //this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+      this.jsonService.getJsonData(this.jsonLink)
         .subscribe(response => { // acceder a .data del item "data" del json
           const config = response.config;
           const data = response.data;
@@ -255,7 +330,8 @@ export class TabCompComponent {
       this.cargarTotales();
     }
 
-    this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+    this.jsonService.getJsonData(this.jsonLink)
+    //this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
       .subscribe(response => { // acceder a .data del item "data" del json
         const config = response.config;
         const data = response.data;
@@ -509,24 +585,32 @@ export class TabCompComponent {
   }
 
   refresh() {
-    this.hiddenColumns = [];
-    // Limpiar los filtros
-    this.filters = {};
-    // Establecer el filtro de la tabla a un valor vacío
-    this.dataSource.filter = '';
-    // Reiniciar el ordenamiento de la tabla
-    if (this.sort) {
-      this.sort.active = '';
-      this.sort.direction = '';
-    }
-    // Cargar los datos actualizados en la tabla
-    this.loadTableDataSelector();
-    this.deselectAllRows();
-    this.eraseAllFilters();
+      this.hiddenColumns = [];
+      // Limpiar los filtros
+      this.filters = {};
+      // Establecer el filtro de la tabla a un valor vacío
+      this.dataSource.filter = '';
+      // Reiniciar el ordenamiento de la tabla
+      if (this.sort) {
+        this.sort.active = '';
+        this.sort.direction = '';
+      }
+      // Cargar los datos actualizados en la tabla
+      //this.eraseAllFilters(); // error al refrescar pagina recien cargada...
+      
+      this.deselectAllRows();
+      this.loadTableDataSelector();
+      /*
+      this.loadTableDataSelector();
+      */
+    
+    
+
   }
 
   loadTableDataSelector() {
-    this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+    //this.http.get<{ config: any[], data: any[] }>(this.jsonLink) // get "data" y config de type any[] dentro del json
+    this.jsonService.getJsonData(this.jsonLink)
       .subscribe(response => { // acceder a .data del item "data" del json
         if (response.data.length > 0) {
           // Función para formatear objetos anidados, listas a strings.
@@ -541,7 +625,7 @@ export class TabCompComponent {
           };
 
           // Mapear los objetos para convertir los objetos anidados a strings
-          const modifiedData = response.data.map(item => {                    // acceder a .data del item "data" del json
+          const modifiedData = response.data.map((item: { [x: string]: any; }) => {                    // acceder a .data del item "data" del json
             const modifiedItem: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
               modifiedItem[key] = removeBrackets(item[key]);
@@ -550,7 +634,7 @@ export class TabCompComponent {
           });
 
           const columnConfig = response.config[0]; // Se asume que solo hay un objeto de configuración
-          const colNameData = response.data.map(item => {
+          const colNameData = response.data.map((item: { [x: string]: any; }) => {
             const colNameItem: { [key: string]: any } = {};
             for (const key in item) {
               const columnName = columnConfig[key]?.columnName || key;
@@ -559,7 +643,7 @@ export class TabCompComponent {
             return colNameItem;
           });
 
-          const colsOriginales = response.data.map(item => {
+          const colsOriginales = response.data.map((item: { [x: string]: any; }) => {
             const originalItems: { [key: string]: any } = {}; // Declaración de tipo
             for (const key in item) {
               originalItems[key] = item[key];
@@ -1035,18 +1119,6 @@ export class TabCompComponent {
 
   updateSelectedRowCount_Ag() {
     this.selectedRowCount = this.gridApi.getSelectedRows().length;
-  }
-
-  ngOnInit() {
-    switch (this.tipoTabla) {
-      case "tab_nativa":
-        break;
-      case "tab_aggrid":
-        this.loadGridData_Ag();
-        break;
-      default:
-        break;
-    }
   }
 
   loadGridData_Ag() {

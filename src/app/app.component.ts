@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { JsonPaginaService } from './service/json-pagina.service';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,10 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'app-AgGrid';
   jsonData = "";
+
+  constructor(public jsonPagina: JsonPaginaService){
+
+  }
 
   getData(e: any) {
     /**

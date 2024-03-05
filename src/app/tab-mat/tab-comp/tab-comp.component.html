@@ -1,9 +1,4 @@
 <!--
-
-
--->
-
-
 <button (mouseenter)="isHidden = !isHidden" (mouseleave)="isHidden = !isHidden">hover here</button>
 <input [placeholder]="'texto123'" (mouseenter)="isHidden = !isHidden" (mouseleave)="isHidden = !isHidden">
 <input [value]="'texto123'">
@@ -15,12 +10,33 @@
   </div>
 </ng-container>
 
+-->
+
+
+
+
+
 <!-- Tabla nativa -->
 <div *ngIf="tipoTabla === 'tab_nativa'"
   style="user-select: none; display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100vw; height: 100vh; ">
   <!--class="parentContainer"-->
   <div style="display: flex; flex-direction: column; width: 95vw; margin: 0 auto; height: 90vh;"> <!--class="bigBox"-->
     <div class="botones">
+
+
+      <button mat-raised-button color="primary">
+        <span>
+          dialog
+        </span>
+      </button>
+
+      <button mat-raised-button color="primary" (click)="popUP()">
+        <!--(click)="openSnackBar("test ", "close")"-->
+        <span>
+          popUp
+        </span>
+      </button>
+
 
       <button matTooltip="Exporta las filas seleccionadas, si no hay selección, se exporta toda la tabla."
         [matTooltipShowDelay]="'1500'" mat-raised-button color="primary" (click)="excelExport()">
@@ -167,7 +183,7 @@
 
 
             <ng-container *ngIf="cellType(col) === 'img'">
-              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null"> <!-- max width: 10em... -->
                 <img [src]="element[col]" alt="imagen" style="width: auto;  height: auto; max-width: 80%;  
                 display: block; margin-left: auto; margin-right: auto; ">
               </ng-container>
@@ -188,19 +204,30 @@
 
             <ng-container *ngIf="cellType(col) === 'number'">
               <ng-container *ngIf="element[col] !== '' && element[col] !== null">
+                <span >
+                  {{element[col]}}
+                </span>
+                <!--input [value]="element[col]"   style="display:flex; text-align: center;
+                justify-content: center; width: 8rem;"-->
+              </ng-container>
+            </ng-container>
+            <!--
+            <ng-container *ngIf="cellType(col) === 'number'">
+              <ng-container *ngIf="element[col] !== '' && element[col] !== null">
 
                 <span *ngIf="showInput === false" (mouseenter)="showInput = !showInput">
-                  {{element[col]}} <!-- por default muestra sus decimales.-->
+                  {{element[col]}}
                   
                 </span>
                 <ng-container *ngIf="showInput">
                   <input [value]="element[col]" (mouseleave)="showInput = !showInput">
                 </ng-container>
-
-                
               </ng-container>
 
             </ng-container>
+            -->
+
+
             <ng-container *ngIf="cellType(col) === 'number_miles'"> <!-- comma -->
               <ng-container *ngIf="element[col] !== '' && element[col] !== null">
                 {{element[col] | number:'1.0'}} <!-- , en miles + todos sus decimales -->
@@ -323,6 +350,7 @@
         </tr>
         <!--mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor:auto" class="hover-effect"
           [class.selected-row]="selection.isSelected(row)" (click)="rowClick(row, $event)"></mat-row-->
+          
       </table>
 
     </div>
