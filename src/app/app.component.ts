@@ -25,7 +25,6 @@ export class AppComponent {
 
   deleteTest(e: any) { // e = row
     console.log("Test: \"deleteTest\"" +  e);
-
     // ABRE POp up de confirmacion
     // SI, elimina
     // NO, no hace nada

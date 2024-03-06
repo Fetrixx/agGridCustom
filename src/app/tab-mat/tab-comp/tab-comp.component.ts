@@ -18,30 +18,25 @@ birth date cuando es null da error, ver format time para guiarse,
 
 ya?:
 ? flex correcto en tabla (ancho de cols) ? (cuando la tabla tiene muchas columnas, parece que no tiene flex)
-
-en proceso:
+? eliminar los "format" que no se usen 
 - calcula los datos  numericos, manejar edgeCases, en caso de que el valor no sea numerico. (solucion: asignar bien los datos del json)
 - (total de todos?, en pantalla? seleccionados?) (solucion: total de todos los elementos.)
 - formato para json config "config" ["id": {"total": true},] (funciona si el valor es numerico) (ya esta)
 - agregar usd o gs, verificando pipe ? al  total. (?)
 
-falta: 
-- multi sort (ngx-mat-multi-sort ?)
-- pivot (?)
-
-eliminar los "format" que no se usen ?
-
+en proceso:
  (  como modificar sin backend?  )
 - agregar inputs en las casillas al hacer hover en campos ?
 consumo json?: 
 // https://medium.com/@ingenieromaciasgil/consumiendo-un-archivo-json-en-angular-d88fea1995ec
-
-
 -eventos, carga json rxjs
 
-
+falta: 
+- multi sort (ngx-mat-multi-sort ?)
+- pivot (?)
 
 */
+
 import { Component, ViewChild, AfterViewInit, HostListener, Input, ViewChildren, QueryList, ElementRef, EventEmitter, Output } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HttpClient } from '@angular/common/http';
