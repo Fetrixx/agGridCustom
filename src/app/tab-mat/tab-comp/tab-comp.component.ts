@@ -32,7 +32,7 @@ falta:
 eliminar los "format" que no se usen ?
 
  (  como modificar sin backend?  )
-- agregar inputs en las casillas al hacer hover en campos 
+- agregar inputs en las casillas al hacer hover en campos ?
 consumo json?: 
 // https://medium.com/@ingenieromaciasgil/consumiendo-un-archivo-json-en-angular-d88fea1995ec
 
